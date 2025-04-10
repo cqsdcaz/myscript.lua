@@ -3,12 +3,19 @@ local function createGui()
     local screenGui = Instance.new("ScreenGui")
     screenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
 
-    -- Create the button
-    local button = Instance.new("TextButton")
-    button.Size = UDim2.new(0, 200, 0, 50)
-    button.Position = UDim2.new(0.5, -100, 0.5, -25)
-    button.Text = "Click Me to Fly to Galley Captain"
-    button.Parent = screenGui
+    -- Create the fly-to button
+    local flyButton = Instance.new("TextButton")
+    flyButton.Size = UDim2.new(0, 200, 0, 50)
+    flyButton.Position = UDim2.new(0.5, -100, 0.5, -25)
+    flyButton.Text = "Click Me to Fly to Galley Captain"
+    flyButton.Parent = screenGui
+
+    -- Create the exit button
+    local exitButton = Instance.new("TextButton")
+    exitButton.Size = UDim2.new(0, 200, 0, 50)
+    exitButton.Position = UDim2.new(0.5, -100, 0.5, 35)
+    exitButton.Text = "Exit Script"
+    exitButton.Parent = screenGui
 
     -- Galley Captain's teleport details
     local Galley_Captain = {
@@ -46,11 +53,47 @@ local function createGui()
     end
 
     -- Button click event to start flying
-    button.MouseButton1Click:Connect(function()
+    flyButton.MouseButton1Click:Connect(function()
         -- Start flying to Galley Captain's position
         flyToTarget(Galley_Captain.CFramePos.Position)
         print("Flying to Galley Captain!")
     end)
+
+    -- Button click event to exit/close the script
+    exitButton.MouseButton1Click:Connect(function()
+        -- Remove the GUI (effectively "exit" the script)
+        screenGui:Destroy()
+        print("Exiting script and removing GUI.")
+    end)
+
+    -- Make the entire GUI draggable
+    local dragging, dragInput, dragStart, startPos
+
+    local function onInputBegan(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragging = true
+            dragStart = input.Position
+            startPos = screenGui.Position
+        end
+    end
+
+    local function onInputChanged(input)
+        if dragging then
+            local delta = input.Position - dragStart
+            screenGui.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+        end
+    end
+
+    local function onInputEnded(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragging = false
+        end
+    end
+
+    -- Connect input events to handle the drag logic for the entire GUI
+    screenGui.InputBegan:Connect(onInputBegan)
+    screenGui.InputChanged:Connect(onInputChanged)
+    screenGui.InputEnded:Connect(onInputEnded)
 end
 
 -- Create the GUI when the script runs
