@@ -71,7 +71,7 @@ local buttonCorner = Instance.new("UICorner")
 buttonCorner.CornerRadius = UDim.new(0, 6)
 buttonCorner.Parent = tpButton
 
--- Copy ID Button
+-- Copy ID Button at the bottom of the screen
 local copyIdButton = Instance.new("TextButton")
 copyIdButton.Text = "Copy Place ID"
 copyIdButton.Size = UDim2.new(1, -20, 0, 40)
