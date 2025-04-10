@@ -10,7 +10,7 @@ gui.Parent = player:WaitForChild("PlayerGui")
 
 -- Create a Frame
 local frame = Instance.new("Frame")
-frame.Size = UDim2.new(0, 300, 0, 180)
+frame.Size = UDim2.new(0, 300, 0, 210)  -- Increased height to accommodate the new button
 frame.Position = UDim2.new(0.5, -150, 0.5, -90)
 frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 frame.BorderSizePixel = 0
@@ -71,7 +71,23 @@ local buttonCorner = Instance.new("UICorner")
 buttonCorner.CornerRadius = UDim.new(0, 6)
 buttonCorner.Parent = tpButton
 
--- Button click action
+-- Copy ID Button
+local copyIdButton = Instance.new("TextButton")
+copyIdButton.Text = "Copy Place ID"
+copyIdButton.Size = UDim2.new(1, -20, 0, 40)
+copyIdButton.Position = UDim2.new(0, 10, 0, 170)
+copyIdButton.BackgroundColor3 = Color3.fromRGB(0, 85, 255)
+copyIdButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+copyIdButton.Font = Enum.Font.SourceSansBold
+copyIdButton.TextSize = 18
+copyIdButton.Parent = frame
+
+-- Round button for copy ID
+local copyButtonCorner = Instance.new("UICorner")
+copyButtonCorner.CornerRadius = UDim.new(0, 6)
+copyButtonCorner.Parent = copyIdButton
+
+-- Button click action for teleport
 tpButton.MouseButton1Click:Connect(function()
 	local placeId = tonumber(placeInput.Text)
 	local jobId = jobInput.Text ~= "" and jobInput.Text or nil
@@ -87,5 +103,32 @@ tpButton.MouseButton1Click:Connect(function()
 		TeleportService:TeleportToPlaceInstance(placeId, jobId, player)
 	else
 		TeleportService:Teleport(placeId, player)
+	end
+end)
+
+-- Button click action for copy ID
+copyIdButton.MouseButton1Click:Connect(function()
+	local placeId = tonumber(placeInput.Text)
+
+	if not placeId then
+		copyIdButton.Text = "Invalid Place ID!"
+		task.wait(1.5)
+		copyIdButton.Text = "Copy Place ID"
+		return
+	end
+
+	-- Copy place ID to clipboard
+	local success, message = pcall(function()
+		setclipboard(tostring(placeId)) -- Copies the place ID to the clipboard
+	end)
+
+	if success then
+		copyIdButton.Text = "ID Copied!"
+		task.wait(1.5)
+		copyIdButton.Text = "Copy Place ID"
+	else
+		copyIdButton.Text = "Failed to Copy!"
+		task.wait(1.5)
+		copyIdButton.Text = "Copy Place ID"
 	end
 end)
