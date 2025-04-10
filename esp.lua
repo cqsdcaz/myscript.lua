@@ -2,7 +2,7 @@ local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local player = Players.LocalPlayer
 
--- Your fruit ID dictionary
+-- Fruit asset ID to name map
 local FruitsId = {
 	["rbxassetid://15124425041"] = "Rocket-Rocket",
 	["rbxassetid://15123685330"] = "Spin-Spin",
@@ -45,43 +45,51 @@ local FruitsId = {
 	["rbxassetid://95749033139458"] = "Dragon East-Dragon East"
 }
 
--- Function to create ESP Billboard
-local function createESP(part, fruitName)
-	if part:FindFirstChild("FruitESP") then return end -- Prevent duplicates
+-- ESP creation
+local function createESP(part, label, color)
+	if not part or part:FindFirstChild("ESPLabel") then return end
 
-	local billboard = Instance.new("BillboardGui")
-	billboard.Name = "FruitESP"
-	billboard.Size = UDim2.new(0, 200, 0, 50)
-	billboard.AlwaysOnTop = true
-	billboard.Adornee = part
-	billboard.StudsOffset = Vector3.new(0, 3, 0)
-	billboard.Parent = part
+	local gui = Instance.new("BillboardGui")
+	gui.Name = "ESPLabel"
+	gui.Size = UDim2.new(0, 200, 0, 40)
+	gui.StudsOffset = Vector3.new(0, 3, 0)
+	gui.AlwaysOnTop = true
+	gui.Adornee = part
+	gui.Parent = part
 
-	local textLabel = Instance.new("TextLabel")
-	textLabel.Size = UDim2.new(1, 0, 1, 0)
-	textLabel.BackgroundTransparency = 1
-	textLabel.Text = fruitName
-	textLabel.TextColor3 = Color3.fromRGB(255, 255, 0)
-	textLabel.TextStrokeTransparency = 0
-	textLabel.TextScaled = true
-	textLabel.Font = Enum.Font.SourceSansBold
-	textLabel.Parent = billboard
+	local text = Instance.new("TextLabel")
+	text.Size = UDim2.new(1, 0, 1, 0)
+	text.BackgroundTransparency = 1
+	text.Text = label
+	text.TextColor3 = color or Color3.fromRGB(255, 255, 0)
+	text.TextStrokeTransparency = 0.5
+	text.TextScaled = true
+	text.Font = Enum.Font.SourceSansBold
+	text.Parent = gui
 end
 
--- Scan workspace for fruit parts
-local function scanForFruits()
+-- Scanner
+local function scanWorld()
 	for _, obj in pairs(workspace:GetDescendants()) do
+		-- Fruit ESP
 		if obj:IsA("MeshPart") or obj:IsA("Part") then
-			local textureId = obj.TextureID or obj.MeshId or obj:FindFirstChild("Mesh") and obj.Mesh.TextureId
+			local textureId = obj.TextureID or obj.MeshId or (obj:FindFirstChild("Mesh") and obj.Mesh.TextureId)
 			if textureId and FruitsId[textureId] then
-				createESP(obj, FruitsId[textureId])
+				createESP(obj, FruitsId[textureId], Color3.fromRGB(255, 255, 0)) -- Yellow for fruit
 			end
+		end
+
+		-- Chest ESP (match name or appearance)
+		if obj:IsA("Part") and obj.Name:lower():find("chest") then
+			createESP(obj, "Chest", Color3.fromRGB(0, 255, 255)) -- Cyan for chest
+		elseif obj:IsA("Model") and obj.Name:lower():find("chest") and obj:FindFirstChildWhichIsA("BasePart") then
+			createESP(obj:FindFirstChildWhichIsA("BasePart"), "Chest", Color3.fromRGB(0, 255, 255))
 		end
 	end
 end
 
--- Re-scan every few seconds in case new fruits spawn
+-- Loop
 while true do
-	pcall(scanForFruits)
+	pcall(scanWorld)
 	task.wait(5)
 end
