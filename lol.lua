@@ -133,9 +133,9 @@ end
 showText(script_enabled, 3)
 onSwitchClick()
 switch.Activated:Connect(onSwitchClick)
-
 -- === ESP Setup with Name Label ===
 
+-- Function to create the ESP (Box + Name label)
 local function createESP(part, fruitName)
     -- Create Box ESP
     local box = Instance.new("BoxHandleAdornment")
@@ -148,12 +148,12 @@ local function createESP(part, fruitName)
     box.Transparency = 0.5
     box.Parent = part
 
-    -- Create Name Label
+    -- Create BillboardGui for fruit name label
     local billboard = Instance.new("BillboardGui")
     billboard.Name = "FruitLabel"
     billboard.Adornee = part
     billboard.Size = UDim2.new(0, 100, 0, 40)
-    billboard.StudsOffset = Vector3.new(0, 2.5, 0)
+    billboard.StudsOffset = Vector3.new(0, 2.5, 0)  -- Adjust offset to make it float above
     billboard.AlwaysOnTop = true
     billboard.Parent = part
 
@@ -168,6 +168,7 @@ local function createESP(part, fruitName)
     label.Parent = billboard
 end
 
+-- Function to remove ESP
 local function removeESP(fruit)
     local handle = fruit:FindFirstChild("Handle")
     if handle then
@@ -179,16 +180,16 @@ local function removeESP(fruit)
     end
 end
 
--- Add ESP to all currently existing fruits
+-- Add ESP to all existing fruits
 for _, fruit in pairs(workspace:GetChildren()) do
     if fruit.Name == "Fruit " and fruit:FindFirstChild("Handle") then
         createESP(fruit.Handle, fruit.Name)
     end
 end
 
--- ESP on spawn
+-- ESP on fruit spawn (new fruit added to the workspace)
 workspace.ChildAdded:Connect(function(child)
-    if child.Name == "Fruit " then
+    if child.Name == "Fruit " and child:FindFirstChild("Handle") then
         local handle = child:WaitForChild("Handle", 5)
         if handle then
             createESP(handle, child.Name)
@@ -196,11 +197,9 @@ workspace.ChildAdded:Connect(function(child)
     end
 end)
 
--- Cleanup on despawn
+-- Cleanup on fruit despawn (fruit removed from the workspace)
 workspace.ChildRemoved:Connect(function(child)
     if child.Name == "Fruit " then
         removeESP(child)
     end
 end)
-
--- euyogi
