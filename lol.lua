@@ -28,10 +28,12 @@ if (game:GetService("LocalizationService").RobloxLocaleId == "pt-br") then
     collected = "Fruta despawnada/coletada."
 end
 
+-- if executed twice or more
 if codes_button:FindFirstChild("NotifierLed") then
     return
 end
 
+-- creates led to indicate notifier status
 local led = Instance.new("Frame")
 led.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
 led.BackgroundTransparency = 0.3
@@ -42,6 +44,7 @@ led.Parent = codes_button
 local border = Instance.new("UICorner", led)
 border.CornerRadius = UDim.new(1)
 
+-- creates notifier switch by making a copy of an existent blox fruits switch
 local switch = dmg_counter_button:Clone()
 switch.Notify.Text = description
 switch.TextLabel.Text = off
@@ -52,8 +55,11 @@ settings_button.Activated:Connect(function()
     switch.Visible = dmg_counter_button.Visible
 end)
 
+-- stores the connection, so after we can disconnect
+-- on switch click (also used to check switch state)
 local workspace_connection
 
+-- displays text on the label that locates fruits
 local function showText(text, time)
     label.Text = text
     label.Visible = true
@@ -63,6 +69,7 @@ local function showText(text, time)
     end
 end
 
+-- used when a fruit spawns
 local function playSound(asset_id, pb_speed)
     local sound = Instance.new("Sound", workspace)
     sound.SoundId = asset_id
@@ -74,38 +81,13 @@ local function playSound(asset_id, pb_speed)
     end)
 end
 
+-- called when a fruit spawns
 local function enableNotifier(fruit)
     local handle = fruit:WaitForChild("Handle")
     local fruit_alive = true
     playSound("rbxassetid://3997124966", 4)
 
-    -- Makes player fly toward the fruit (once when detected)
-    local function flyToFruit()
-        local hrp = player.Character:WaitForChild("HumanoidRootPart")
-        local direction = (handle.Position - hrp.Position).Unit
-        local speed = 60 -- Adjust speed if needed
-
-        local bodyVelocity = Instance.new("BodyVelocity")
-        bodyVelocity.Velocity = direction * speed
-        bodyVelocity.MaxForce = Vector3.new(100000, 100000, 100000)
-        bodyVelocity.P = 1250
-        bodyVelocity.Parent = hrp
-
-        task.spawn(function()
-            local reached = false
-            while not reached and workspace:FindFirstChild(fruit.Name) do
-                local distance = (hrp.Position - handle.Position).Magnitude
-                if distance < 5 then
-                    reached = true
-                end
-                task.wait(0.1)
-            end
-            bodyVelocity:Destroy()
-        end)
-    end
-
-    flyToFruit()
-
+    -- keeps updating the distance if fruit is alive and switch is on
     while fruit_alive and workspace_connection do
         local dist = math.floor((player.Character:WaitForChild("HumanoidRootPart").Position - handle.Position)
             .Magnitude * 0.15)
@@ -121,8 +103,9 @@ local function enableNotifier(fruit)
 end
 
 local function onSwitchClick()
-    if workspace_connection then
-        workspace_connection:Disconnect()
+    -- enables/disables workspace connection listening for children added
+    if workspace_connection then          -- check if we are connected
+        workspace_connection:Disconnect() -- disconnect the event and stop listening
         workspace_connection = nil
         led.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
         switch.TextLabel.Text = off
@@ -132,13 +115,15 @@ local function onSwitchClick()
         switch.TextLabel.Text = on
         showText(notifier_enabled, 2)
 
+        -- connect event and starts listening
         workspace_connection = workspace.ChildAdded:Connect(function(child)
-            if child.Name == "Fruit " then
+            if child.Name == "Fruit " then -- intended space
                 task.spawn(enableNotifier, child)
             end
         end)
 
-        local fruit = workspace:FindFirstChild("Fruit ")
+        -- looks for an already spawned fruit (need workspace_connection)
+        local fruit = workspace:FindFirstChild("Fruit ") -- intended space
         if fruit then
             task.spawn(enableNotifier, fruit)
         end
@@ -148,3 +133,5 @@ end
 showText(script_enabled, 3)
 onSwitchClick()
 switch.Activated:Connect(onSwitchClick)
+
+-- euyogi
