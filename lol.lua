@@ -1,71 +1,39 @@
-local QuestsData = {QuestsNames, Quests}
+-- LocalScript placed in StarterPlayer -> StarterPlayerScripts or StarterGui
 
-local Quests = {
-    -- First Sea
-    Bandit = {
-        Enemy = "Bandit [Lv. 5]",
-        QuestName = "BanditQuest1",
-        EnemyName = "Bandit",
-        LevelQuest = 1,
-        CFramePos = CFrame.new(1059.37195, 15.4495068, 1550.4231, 0.939700544, -0, -0.341998369, 0, 1, -0, 0.341998369, 0, 0.939700544),
-        QuestGiver = "Bandit Quest Giver",
-        World = 1
-    },
-    Monkey = {
-        Enemy = "Monkey [Lv. 14]",
-        QuestName = "JungleQuest",
-        EnemyName = "Monkey",
-        LevelQuest = 1,
-        CFramePos = CFrame.new(-1598.08911, 35.5501175, 153.377838, 0, 0, 1, 0, 1, -0, -1, 0, 0),
-        QuestGiver = "Adventurer",
-        World = 1
-    },
-    Gorilla = {
-        Enemy = "Gorilla [Lv. 20]",
-        QuestName = "JungleQuest",
-        EnemyName = "Gorilla",
-        LevelQuest = 2,
-        CFramePos = CFrame.new(-1598.08911, 35.5501175, 153.377838, 0, 0, 1, 0, 1, -0, -1, 0, 0),
-        QuestGiver = "Adventurer",
-        World = 1
-    },
-    Pirate = {
-        Enemy = "Pirate [Lv. 35]",
-        QuestName = "BuggyQuest1",
-        EnemyName = "Pirate",
-        LevelQuest = 1,
-        CFramePos = CFrame.new(-1141.07483, 4.10001802, 3831.5498, 0.965929627, -0, -0.258804798, 0, 1, -0, 0.258804798, 0, 0.965929627),
-        QuestGiver = "Pirate Adventurer",
-        World = 1
-    },
-    -- Add more quests here as needed
-}
+local player = game.Players.LocalPlayer
+local playerGui = player:WaitForChild("PlayerGui")
 
--- Auto-enable the button to activate the script
-local AutoActivateButton = Instance.new("TextButton")
-AutoActivateButton.Size = UDim2.new(0, 200, 0, 50)
-AutoActivateButton.Position = UDim2.new(0.5, -100, 0.5, -25)
-AutoActivateButton.Text = "Activate Quest"
+-- Create ScreenGui to hold the buttons
+local screenGui = Instance.new("ScreenGui")
+screenGui.Parent = playerGui
 
-AutoActivateButton.MouseButton1Click:Connect(function()
-    -- Automatically activate quests
-    print("Quests activated!")
-    -- You can put the logic for enabling the quests here
-    -- For example, you could start quest activities for the player
+-- Create the Quest Activate Button
+local questButton = Instance.new("TextButton")
+questButton.Parent = screenGui
+questButton.Size = UDim2.new(0, 200, 0, 50)  -- Size of the button
+questButton.Position = UDim2.new(0.5, -100, 0.4, -25)  -- Position of the button (center)
+questButton.Text = "Activate Quest"
+questButton.BackgroundColor3 = Color3.fromRGB(0, 255, 0)  -- Green Button
+questButton.TextColor3 = Color3.fromRGB(255, 255, 255)  -- White text
+
+-- Create the Exit Button
+local exitButton = Instance.new("TextButton")
+exitButton.Parent = screenGui
+exitButton.Size = UDim2.new(0, 200, 0, 50)  -- Size of the button
+exitButton.Position = UDim2.new(0.5, -100, 0.5, -25)  -- Position of the button (center)
+exitButton.Text = "Exit Script"
+exitButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0)  -- Red Button
+exitButton.TextColor3 = Color3.fromRGB(255, 255, 255)  -- White text
+
+-- Function for activating the quest (you can customize this)
+questButton.MouseButton1Click:Connect(function()
+    print("Quest Activated!")  -- Placeholder: replace with actual quest logic
+    -- You can trigger any quest function here instead of print
 end)
 
--- Button to exit the script
-local ExitButton = Instance.new("TextButton")
-ExitButton.Size = UDim2.new(0, 200, 0, 50)
-ExitButton.Position = UDim2.new(0.5, -100, 0.5, 25)
-ExitButton.Text = "Exit Script"
-
-ExitButton.MouseButton1Click:Connect(function()
-    -- Logic to safely exit the script
-    print("Exiting script...")
-    game:Shutdown()  -- This line will shut down the game
+-- Function to exit the script or shutdown the game
+exitButton.MouseButton1Click:Connect(function()
+    game:Shutdown()  -- This will close the game
+    -- Alternatively, if you just want to hide the GUI instead of shutting down the game:
+    -- screenGui:Destroy()  -- This would remove the GUI
 end)
-
--- Parent buttons to the screen (or specific GUI)
-AutoActivateButton.Parent = game.Players.LocalPlayer.PlayerGui
-ExitButton.Parent = game.Players.LocalPlayer.PlayerGui
