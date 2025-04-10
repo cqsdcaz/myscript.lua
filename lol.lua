@@ -134,4 +134,73 @@ showText(script_enabled, 3)
 onSwitchClick()
 switch.Activated:Connect(onSwitchClick)
 
+-- === ESP Setup with Name Label ===
+
+local function createESP(part, fruitName)
+    -- Create Box ESP
+    local box = Instance.new("BoxHandleAdornment")
+    box.Name = "FruitESP"
+    box.Adornee = part
+    box.AlwaysOnTop = true
+    box.ZIndex = 10
+    box.Size = part.Size + Vector3.new(0.2, 0.2, 0.2)
+    box.Color3 = Color3.fromRGB(255, 200, 0)
+    box.Transparency = 0.5
+    box.Parent = part
+
+    -- Create Name Label
+    local billboard = Instance.new("BillboardGui")
+    billboard.Name = "FruitLabel"
+    billboard.Adornee = part
+    billboard.Size = UDim2.new(0, 100, 0, 40)
+    billboard.StudsOffset = Vector3.new(0, 2.5, 0)
+    billboard.AlwaysOnTop = true
+    billboard.Parent = part
+
+    local label = Instance.new("TextLabel")
+    label.Size = UDim2.new(1, 0, 1, 0)
+    label.BackgroundTransparency = 1
+    label.Text = fruitName
+    label.TextColor3 = Color3.new(1, 1, 0)
+    label.TextStrokeTransparency = 0.5
+    label.TextScaled = true
+    label.Font = Enum.Font.GothamBold
+    label.Parent = billboard
+end
+
+local function removeESP(fruit)
+    local handle = fruit:FindFirstChild("Handle")
+    if handle then
+        local box = handle:FindFirstChild("FruitESP")
+        if box then box:Destroy() end
+
+        local label = handle:FindFirstChild("FruitLabel")
+        if label then label:Destroy() end
+    end
+end
+
+-- Add ESP to all currently existing fruits
+for _, fruit in pairs(workspace:GetChildren()) do
+    if fruit.Name == "Fruit " and fruit:FindFirstChild("Handle") then
+        createESP(fruit.Handle, fruit.Name)
+    end
+end
+
+-- ESP on spawn
+workspace.ChildAdded:Connect(function(child)
+    if child.Name == "Fruit " then
+        local handle = child:WaitForChild("Handle", 5)
+        if handle then
+            createESP(handle, child.Name)
+        end
+    end
+end)
+
+-- Cleanup on despawn
+workspace.ChildRemoved:Connect(function(child)
+    if child.Name == "Fruit " then
+        removeESP(child)
+    end
+end)
+
 -- euyogi
