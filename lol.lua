@@ -1,183 +1,150 @@
--- Anti-AFK
-for i, v in pairs(getconnections(game.Players.LocalPlayer.Idled)) do
-    v:Disable()
+local player = game.Players.LocalPlayer
+local gui = player:WaitForChild("PlayerGui")
+    :WaitForChild("Main")
+local label = gui:WaitForChild("[OLD]Radar")
+local codes_button = gui:WaitForChild("Code")
+local settings_button = gui:WaitForChild("Settings")
+local dmg_counter_button = settings_button:WaitForChild("Buttons")
+    :WaitForChild("DmgCounterButton")
+local script_enabled = "Script enabled successfully."
+local notifier_enabled = "Notifier enabled successfully."
+local notifier_disabled = "Notifier disabled successfully."
+local description = "Shows spawned fruits location."
+local on = "Notifier (ON)"
+local off = "Notifier (OFF)"
+local location = "FRUIT DETECTED: "
+local magnitude = "m away."
+local collected = "Fruit despawned/collected."
+
+if (game:GetService("LocalizationService").RobloxLocaleId == "pt-br") then
+    script_enabled = "Script ativado com sucesso."
+    notifier_enabled = "Notificador ativado com sucesso."
+    notifier_disabled = "Notificador desativado com sucesso."
+    description = "Mostra a localização das frutas spawnadas."
+    on = "Notificador (ATIVADO)"
+    off = "Notificador (DESATIVADO)"
+    location = "FRUTA DETECTADA: "
+    magnitude = "m de distância."
+    collected = "Fruta despawnada/coletada."
 end
 
--- Tool list
-local tools = {}
+if codes_button:FindFirstChild("NotifierLed") then
+    return
+end
 
-for i, v in pairs(game.Players.LocalPlayer.Backpack:GetChildren()) do
-    if v:IsA("Tool") then
-        table.insert(tools, v.Name)
+local led = Instance.new("Frame")
+led.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+led.BackgroundTransparency = 0.3
+led.Position = UDim2.new(1.3, 0, 0.35, 0)
+led.Size = UDim2.new(0, 8, 0, 8)
+led.Name = "NotifierLed"
+led.Parent = codes_button
+local border = Instance.new("UICorner", led)
+border.CornerRadius = UDim.new(1)
+
+local switch = dmg_counter_button:Clone()
+switch.Notify.Text = description
+switch.TextLabel.Text = off
+switch.Name = "NotifierSwitch"
+switch.Parent = dmg_counter_button.Parent
+
+settings_button.Activated:Connect(function()
+    switch.Visible = dmg_counter_button.Visible
+end)
+
+local workspace_connection
+
+local function showText(text, time)
+    label.Text = text
+    label.Visible = true
+    if (time ~= 0) then
+        task.wait(time)
+        label.Visible = false
     end
 end
 
--- AutoFarm Variables
-local Ms, NM, LQ, NQ, CQ
-
-function CheckQuest()
-    local Lv = game.Players.LocalPlayer.Data.Level.Value
-    if Lv == 0 or Lv <= 10 then
-        Ms = "Bandit [Lv. 5]"
-        NM = "Bandit"
-        LQ = 1
-        NQ = "BanditQuest1"
-        CQ = CFrame.new(1062.647, 16.517, 1546.552)
-    end
+local function playSound(asset_id, pb_speed)
+    local sound = Instance.new("Sound", workspace)
+    sound.SoundId = asset_id
+    sound.Volume = 1
+    sound.PlaybackSpeed = pb_speed
+    sound:Play()
+    sound.Ended:Connect(function()
+        sound:Destroy()
+    end)
 end
 
-function TP(P)
-    local Distance = (P.Position - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).Magnitude
-    local Speed = 300
+local function enableNotifier(fruit)
+    local handle = fruit:WaitForChild("Handle")
+    local fruit_alive = true
+    playSound("rbxassetid://3997124966", 4)
 
-    if Distance < 10 then
-        Speed = 1000
-    elseif Distance < 170 then
-        game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = P
-        Speed = 350
-    elseif Distance < 1000 then
-        Speed = 350
-    end
+    -- Makes player fly toward the fruit (once when detected)
+    local function flyToFruit()
+        local hrp = player.Character:WaitForChild("HumanoidRootPart")
+        local direction = (handle.Position - hrp.Position).Unit
+        local speed = 60 -- Adjust speed if needed
 
-    game:GetService("TweenService"):Create(
-        game.Players.LocalPlayer.Character.HumanoidRootPart,
-        TweenInfo.new(Distance / Speed, Enum.EasingStyle.Linear),
-        {CFrame = P}
-    ):Play()
-end
+        local bodyVelocity = Instance.new("BodyVelocity")
+        bodyVelocity.Velocity = direction * speed
+        bodyVelocity.MaxForce = Vector3.new(100000, 100000, 100000)
+        bodyVelocity.P = 1250
+        bodyVelocity.Parent = hrp
 
-spawn(function()
-    while task.wait() do
-        if _G.AutoFarm then
-            CheckQuest()
-            if not game.Players.LocalPlayer.PlayerGui.Main.Quest.Visible then
-                TP(CQ)
-                task.wait(0.9)
-                game.ReplicatedStorage.Remotes.CommF_:InvokeServer("StartQuest", NQ, LQ)
-            else
-                for i, v in pairs(game.Workspace.Enemies:GetChildren()) do
-                    if v.Name == Ms then
-                        TP(v.HumanoidRootPart.CFrame * CFrame.new(0, 20, 0))
-                        v.HumanoidRootPart.Size = Vector3.new(60, 60, 60)
-                    end
+        task.spawn(function()
+            local reached = false
+            while not reached and workspace:FindFirstChild(fruit.Name) do
+                local distance = (hrp.Position - handle.Position).Magnitude
+                if distance < 5 then
+                    reached = true
                 end
+                task.wait(0.1)
             end
-        end
+            bodyVelocity:Destroy()
+        end)
     end
-end)
 
-spawn(function()
-    game:GetService("RunService").RenderStepped:Connect(function()
-        if _G.AutoFarm then
-            pcall(function()
-                game:GetService("VirtualUser"):CaptureController()
-                game:GetService("VirtualUser"):Button1Down(Vector2.new(0, 1, 0, 1))
-            end)
-        end
-    end)
-end)
+    flyToFruit()
 
--- UI Library
-local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/xHeptc/Kavo-UI-Library/main/source.lua"))()
-local Window = Library.CreateLib("BloxFruits Script Test", "Ocean")
-
--- Main Tab
-local Main = Window:NewTab("Main")
-local MainSection = Main:NewSection("Main")
-
-local toolDropdown = MainSection:NewDropdown("Weapon", "Choose your tool to use!", tools, function(weapon)
-    -- You can use the selected weapon variable here if needed
-end)
-
--- Auto update tool list
-game.Players.LocalPlayer.Backpack.DescendantAdded:Connect(function(tool)
-    if tool:IsA("Tool") then
-        table.insert(tools, tool.Name)
-        toolDropdown:Refresh(tools)
+    while fruit_alive and workspace_connection do
+        local dist = math.floor((player.Character:WaitForChild("HumanoidRootPart").Position - handle.Position)
+            .Magnitude * 0.15)
+        showText(location .. dist .. magnitude, 0)
+        task.wait(0.2)
+        fruit_alive = workspace:FindFirstChild(fruit.Name)
     end
-end)
 
-game.Players.LocalPlayer.Backpack.DescendantRemoving:Connect(function(tool)
-    if tool:IsA("Tool") then
-        for i, v in pairs(tools) do
-            if v == tool.Name then
-                table.remove(tools, i)
-                break
-            end
-        end
-        toolDropdown:Refresh(tools)
+    if not fruit_alive then
+        playSound("rbxassetid://4612375233", 1)
+        showText(collected, 3)
     end
-end)
-
-MainSection:NewToggle("AutoFarm", "AutoFarm Test", function(state)
-    _G.AutoFarm = state
-end)
-
-MainSection:NewTextBox("Fake Level", "Sets fake level value", function(fakeLevel)
-    game.Players.LocalPlayer.Data.Level.Value = tonumber(fakeLevel)
-end)
-
--- Stats Tab
-local Stats = Window:NewTab("Stats")
-local StatsSection = Stats:NewSection("Stats")
-
-StatsSection:NewToggle("Melee", "Auto Stats", function(state)
-    _G.autoMeeleStats = state
-    while _G.autoMeeleStats do
-        game.ReplicatedStorage.Remotes.CommF_:InvokeServer("AddPoint", "Melee", 1)
-        task.wait(30)
-    end
-end)
-
-StatsSection:NewToggle("Defense", "Auto Stats", function(state)
-    _G.autoDefenseStats = state
-    while _G.autoDefenseStats do
-        game.ReplicatedStorage.Remotes.CommF_:InvokeServer("AddPoint", "Defense", 1)
-        task.wait(30)
-    end
-end)
-
-StatsSection:NewToggle("Sword", "Auto Stats", function(state)
-    _G.autoSword = state
-    while _G.autoSword do
-        game.ReplicatedStorage.Remotes.CommF_:InvokeServer("AddPoint", "Sword", 1)
-        task.wait(30)
-    end
-end)
-
-StatsSection:NewToggle("Gun", "Auto Stats", function(state)
-    _G.autoGun = state
-    while _G.autoGun do
-        game.ReplicatedStorage.Remotes.CommF_:InvokeServer("AddPoint", "Gun", 1)
-        task.wait(30)
-    end
-end)
-
-StatsSection:NewToggle("Devil Fruit", "Auto Stats", function(state)
-    _G.autoDevilFruit = state
-    while _G.autoDevilFruit do
-        game.ReplicatedStorage.Remotes.CommF_:InvokeServer("AddPoint", "Demon Fruit", 1)
-        task.wait(30)
-    end
-end)
-
--- Teleport Tab
-local Teleport = Window:NewTab("Teleport")
-local TeleportSection = Teleport:NewSection("Teleport")
-
-local function createTeleportButton(name, pos)
-    TeleportSection:NewButton(name, "Teleport you there", function()
-        local tweenService = game:GetService("TweenService")
-        local tweenInfo = TweenInfo.new(5, Enum.EasingStyle.Linear)
-        tweenService:Create(game.Players.LocalPlayer.Character.HumanoidRootPart, tweenInfo, {CFrame = pos}):Play()
-    end)
 end
 
-createTeleportButton("Pirate Island", CFrame.new(1041.886, 16.273, 1424.937))
-createTeleportButton("Marine Island", CFrame.new(-2896.686, 41.489, 2009.275))
-createTeleportButton("Colosseum", CFrame.new(-1541.088, 7.389, -2987.406))
-createTeleportButton("Desert", CFrame.new(1094.321, 6.570, 4231.636))
-createTeleportButton("Fountain City", CFrame.new(5529.724, 429.357, 4245.550))
-createTeleportButton("Jungle", CFrame.new(-1615.188, 36.852, 150.805))
-createTeleportButton("Marine Fort", CFrame.new(-4846.150, 20.652, 4393.651))
-createTeleportButton("Middle Town", CFrame.new(-705.998, 7.852, 1547.169)) -- Adjusted last coord
+local function onSwitchClick()
+    if workspace_connection then
+        workspace_connection:Disconnect()
+        workspace_connection = nil
+        led.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+        switch.TextLabel.Text = off
+        showText(notifier_disabled, 2)
+    else
+        led.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
+        switch.TextLabel.Text = on
+        showText(notifier_enabled, 2)
+
+        workspace_connection = workspace.ChildAdded:Connect(function(child)
+            if child.Name == "Fruit " then
+                task.spawn(enableNotifier, child)
+            end
+        end)
+
+        local fruit = workspace:FindFirstChild("Fruit ")
+        if fruit then
+            task.spawn(enableNotifier, fruit)
+        end
+    end
+end
+
+showText(script_enabled, 3)
+onSwitchClick()
+switch.Activated:Connect(onSwitchClick)
