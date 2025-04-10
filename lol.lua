@@ -1,24 +1,33 @@
--- Create a simple GUI to test
-local player = game.Players.LocalPlayer
-local screenGui = Instance.new("ScreenGui")
-screenGui.Parent = player.PlayerGui
+local function createGui()
+    -- Create ScreenGui
+    local screenGui = Instance.new("ScreenGui")
+    screenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
 
--- Create a frame to hold the button
-local frame = Instance.new("Frame")
-frame.Parent = screenGui
-frame.Size = UDim2.new(0, 200, 0, 100)
-frame.Position = UDim2.new(0.5, -100, 0.5, -50)
-frame.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    -- Create the button
+    local button = Instance.new("TextButton")
+    button.Size = UDim2.new(0, 200, 0, 50)
+    button.Position = UDim2.new(0.5, -100, 0.5, -25)
+    button.Text = "Click Me to TP to Galley Captain"
+    button.Parent = screenGui
 
--- Create a button inside the frame
-local button = Instance.new("TextButton")
-button.Parent = frame
-button.Size = UDim2.new(0, 180, 0, 40)
-button.Position = UDim2.new(0, 10, 0, 30)
-button.Text = "Click Me"
-button.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
+    -- Galley Captain's teleport details
+    local Galley_Captain = {
+        Enemy = "Galley Captain [Lv. 650]",
+        QuestName = "FountainQuest",
+        EnemyName = "Galley Captain",
+        LevelQuest = 2,
+        CFramePos = CFrame.new(5259.81982, 37.3500175, 4050.0293, 0.087131381, 0, 0.996196866, 0, 1, 0, -0.996196866, 0, 0.087131381),
+        QuestGiver = "Freezeburg Quest Giver",
+        World = 1
+    }
 
--- Add a function to handle button click
-button.MouseButton1Click:Connect(function()
-    print("Button clicked! GUI is working.")
-end)
+    -- Button click event to teleport player
+    button.MouseButton1Click:Connect(function()
+        -- Teleport to Galley Captain's position
+        game.Players.LocalPlayer.Character:SetPrimaryPartCFrame(Galley_Captain.CFramePos)
+        print("Teleported to Galley Captain!")
+    end)
+end
+
+-- Create the GUI when the script runs
+createGui()
