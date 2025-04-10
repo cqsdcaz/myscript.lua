@@ -5,6 +5,7 @@ local codes_button = gui:WaitForChild("Code")
 local settings_button = gui:WaitForChild("Settings")
 local dmg_counter_button = settings_button:WaitForChild("Buttons"):WaitForChild("DmgCounterButton")
 
+-- Localization
 local script_enabled = "Script enabled successfully."
 local notifier_enabled = "Notifier enabled successfully."
 local notifier_disabled = "Notifier disabled successfully."
@@ -29,6 +30,7 @@ end
 
 if codes_button:FindFirstChild("NotifierLed") then return end
 
+-- Notifier LED
 local led = Instance.new("Frame")
 led.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
 led.BackgroundTransparency = 0.3
@@ -38,6 +40,7 @@ led.Name = "NotifierLed"
 led.Parent = codes_button
 Instance.new("UICorner", led).CornerRadius = UDim.new(1)
 
+-- Clone switch
 local switch = dmg_counter_button:Clone()
 switch.Notify.Text = description
 switch.TextLabel.Text = off
@@ -111,7 +114,7 @@ showText(script_enabled, 3)
 onSwitchClick()
 switch.Activated:Connect(onSwitchClick)
 
--- === ESP Setup ===
+-- ESP
 local function createESP(part, fruitName)
     local box = Instance.new("BoxHandleAdornment")
     box.Name = "FruitESP"
@@ -173,81 +176,74 @@ workspace.ChildRemoved:Connect(function(child)
     end
 end)
 
--- === SERVER HOP, COPY, AND JOIN SETUP ===
-local TeleportService = game:GetService("TeleportService")
-local HttpService = game:GetService("HttpService")
-local placeId = game.PlaceId
+-- === GUI: Server Tools (Bottom of Screen) ===
+local screenGui = Instance.new("ScreenGui", player:WaitForChild("PlayerGui"))
+screenGui.Name = "ServerToolsGui"
+screenGui.ResetOnSpawn = false
 
--- Hop Button
-local hopButton = Instance.new("TextButton")
-hopButton.Name = "HopButton"
-hopButton.Text = "Hop Server"
-hopButton.Size = UDim2.new(0, 120, 0, 30)
-hopButton.Position = UDim2.new(0, 10, 0, 250)
-hopButton.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
-hopButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-hopButton.Font = Enum.Font.GothamBold
-hopButton.TextScaled = true
-hopButton.Parent = gui
-Instance.new("UICorner", hopButton).CornerRadius = UDim.new(0, 6)
+local frame = Instance.new("Frame", screenGui)
+frame.Size = UDim2.new(0, 300, 0, 150)
+frame.Position = UDim2.new(1, -310, 1, -160)
+frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+frame.BackgroundTransparency = 0.3
+Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 8)
 
-local function getDifferentServer()
-    local servers = HttpService:JSONDecode(game:HttpGet(
-        "https://games.roblox.com/v1/games/" .. placeId .. "/servers/Public?sortOrder=Asc&limit=100"
-    ))
-    for _, server in pairs(servers.data) do
-        if server.id ~= game.JobId and server.playing < server.maxPlayers then
-            return server.id
-        end
-    end
-    return nil
-end
+local hopButton = Instance.new("TextButton", frame)
+hopButton.Size = UDim2.new(1, -20, 0, 30)
+hopButton.Position = UDim2.new(0, 10, 0, 10)
+hopButton.Text = "Hop to Random Server"
+hopButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+Instance.new("UICorner", hopButton)
 
+local copyButton = Instance.new("TextButton", frame)
+copyButton.Size = UDim2.new(1, -20, 0, 30)
+copyButton.Position = UDim2.new(0, 10, 0, 50)
+copyButton.Text = "Copy This Server ID"
+copyButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+Instance.new("UICorner", copyButton)
+
+local inputBox = Instance.new("TextBox", frame)
+inputBox.Size = UDim2.new(1, -20, 0, 30)
+inputBox.Position = UDim2.new(0, 10, 0, 90)
+inputBox.PlaceholderText = "Enter Server ID..."
+inputBox.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+Instance.new("UICorner", inputBox)
+
+local joinButton = Instance.new("TextButton", frame)
+joinButton.Size = UDim2.new(1, -20, 0, 30)
+joinButton.Position = UDim2.new(0, 10, 0, 130)
+joinButton.Text = "Join Server by ID"
+joinButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+Instance.new("UICorner", joinButton)
+
+-- === Server Actions ===
 hopButton.MouseButton1Click:Connect(function()
-    local serverId = getDifferentServer()
-    if serverId then
-        TeleportService:TeleportToPlaceInstance(placeId, serverId, player)
+    local HttpService = game:GetService("HttpService")
+    local TeleportService = game:GetService("TeleportService")
+    local success, result = pcall(function()
+        return HttpService:GetAsync("https://games.roblox.com/v1/games/" .. game.PlaceId .. "/servers/Public?sortOrder=Asc&limit=100")
+    end)
+
+    if success then
+        local servers = HttpService:JSONDecode(result)
+        for _, server in ipairs(servers.data) do
+            if server.id ~= game.JobId and server.playing < server.maxPlayers then
+                TeleportService:TeleportToPlaceInstance(game.PlaceId, server.id)
+                break
+            end
+        end
     else
-        showText("No other server found!", 3)
+        warn("Failed to get server list.")
     end
 end)
-
--- Copy Server ID Button
-local copyButton = hopButton:Clone()
-copyButton.Name = "CopyButton"
-copyButton.Text = "Copy Server ID"
-copyButton.Position = UDim2.new(0, 10, 0, 290)
-copyButton.Parent = gui
 
 copyButton.MouseButton1Click:Connect(function()
     setclipboard(game.JobId)
-    showText("Server ID copied!", 2)
 end)
-
--- Join Server Input
-local inputBox = Instance.new("TextBox")
-inputBox.Name = "ServerInput"
-inputBox.PlaceholderText = "Enter Server ID"
-inputBox.Size = UDim2.new(0, 200, 0, 30)
-inputBox.Position = UDim2.new(0, 10, 0, 330)
-inputBox.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-inputBox.TextColor3 = Color3.fromRGB(255, 255, 255)
-inputBox.Font = Enum.Font.Gotham
-inputBox.TextScaled = true
-inputBox.Parent = gui
-Instance.new("UICorner", inputBox).CornerRadius = UDim.new(0, 6)
-
--- Join Server Button
-local joinButton = hopButton:Clone()
-joinButton.Text = "Join by ID"
-joinButton.Position = UDim2.new(0, 10, 0, 370)
-joinButton.Parent = gui
 
 joinButton.MouseButton1Click:Connect(function()
     local id = inputBox.Text
-    if id and #id > 10 then
-        TeleportService:TeleportToPlaceInstance(placeId, id, player)
-    else
-        showText("Invalid Server ID", 2)
+    if id and id ~= "" then
+        game:GetService("TeleportService"):TeleportToPlaceInstance(game.PlaceId, id)
     end
 end)
