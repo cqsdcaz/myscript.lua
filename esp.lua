@@ -1,3 +1,4 @@
+-- === Fruit Notifier ===
 local player = game.Players.LocalPlayer
 local gui = player:WaitForChild("PlayerGui"):WaitForChild("Main")
 local label = gui:WaitForChild("[OLD]Radar")
@@ -5,7 +6,6 @@ local codes_button = gui:WaitForChild("Code")
 local settings_button = gui:WaitForChild("Settings")
 local dmg_counter_button = settings_button:WaitForChild("Buttons"):WaitForChild("DmgCounterButton")
 
--- Localization
 local script_enabled = "Script enabled successfully."
 local notifier_enabled = "Notifier enabled successfully."
 local notifier_disabled = "Notifier disabled successfully."
@@ -16,7 +16,7 @@ local location = "FRUIT DETECTED: "
 local magnitude = "m away."
 local collected = "Fruit despawned/collected."
 
-if game:GetService("LocalizationService").RobloxLocaleId == "pt-br" then
+if (game:GetService("LocalizationService").RobloxLocaleId == "pt-br") then
     script_enabled = "Script ativado com sucesso."
     notifier_enabled = "Notificador ativado com sucesso."
     notifier_disabled = "Notificador desativado com sucesso."
@@ -28,9 +28,12 @@ if game:GetService("LocalizationService").RobloxLocaleId == "pt-br" then
     collected = "Fruta despawnada/coletada."
 end
 
-if codes_button:FindFirstChild("NotifierLed") then return end
+-- if executed twice or more
+if codes_button:FindFirstChild("NotifierLed") then
+    return
+end
 
--- Notifier LED
+-- creates led to indicate notifier status
 local led = Instance.new("Frame")
 led.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
 led.BackgroundTransparency = 0.3
@@ -38,9 +41,10 @@ led.Position = UDim2.new(1.3, 0, 0.35, 0)
 led.Size = UDim2.new(0, 8, 0, 8)
 led.Name = "NotifierLed"
 led.Parent = codes_button
-Instance.new("UICorner", led).CornerRadius = UDim.new(1)
+local border = Instance.new("UICorner", led)
+border.CornerRadius = UDim.new(1)
 
--- Clone switch
+-- creates notifier switch by making a copy of an existent blox fruits switch
 local switch = dmg_counter_button:Clone()
 switch.Notify.Text = description
 switch.TextLabel.Text = off
@@ -51,36 +55,47 @@ settings_button.Activated:Connect(function()
     switch.Visible = dmg_counter_button.Visible
 end)
 
+-- stores the connection, so after we can disconnect
+-- on switch click (also used to check switch state)
 local workspace_connection
 
+-- displays text on the label that locates fruits
 local function showText(text, time)
     label.Text = text
     label.Visible = true
-    if time ~= 0 then
+    if (time ~= 0) then
         task.wait(time)
         label.Visible = false
     end
 end
 
+-- used when a fruit spawns
 local function playSound(asset_id, pb_speed)
     local sound = Instance.new("Sound", workspace)
     sound.SoundId = asset_id
     sound.Volume = 1
     sound.PlaybackSpeed = pb_speed
     sound:Play()
-    sound.Ended:Connect(function() sound:Destroy() end)
+    sound.Ended:Connect(function()
+        sound:Destroy()
+    end)
 end
 
+-- called when a fruit spawns
 local function enableNotifier(fruit)
     local handle = fruit:WaitForChild("Handle")
     local fruit_alive = true
     playSound("rbxassetid://3997124966", 4)
+
+    -- keeps updating the distance if fruit is alive and switch is on
     while fruit_alive and workspace_connection do
-        local dist = math.floor((player.Character:WaitForChild("HumanoidRootPart").Position - handle.Position).Magnitude * 0.15)
+        local dist = math.floor((player.Character:WaitForChild("HumanoidRootPart").Position - handle.Position)
+            .Magnitude * 0.15)
         showText(location .. dist .. magnitude, 0)
         task.wait(0.2)
         fruit_alive = workspace:FindFirstChild(fruit.Name)
     end
+
     if not fruit_alive then
         playSound("rbxassetid://4612375233", 1)
         showText(collected, 3)
@@ -88,8 +103,9 @@ local function enableNotifier(fruit)
 end
 
 local function onSwitchClick()
-    if workspace_connection then
-        workspace_connection:Disconnect()
+    -- enables/disables workspace connection listening for children added
+    if workspace_connection then          -- check if we are connected
+        workspace_connection:Disconnect() -- disconnect the event and stop listening
         workspace_connection = nil
         led.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
         switch.TextLabel.Text = off
@@ -98,12 +114,16 @@ local function onSwitchClick()
         led.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
         switch.TextLabel.Text = on
         showText(notifier_enabled, 2)
+
+        -- connect event and starts listening
         workspace_connection = workspace.ChildAdded:Connect(function(child)
-            if child.Name == "Fruit " then
+            if child.Name == "Fruit " then -- intended space
                 task.spawn(enableNotifier, child)
             end
         end)
-        local fruit = workspace:FindFirstChild("Fruit ")
+
+        -- looks for an already spawned fruit (need workspace_connection)
+        local fruit = workspace:FindFirstChild("Fruit ") -- intended space
         if fruit then
             task.spawn(enableNotifier, fruit)
         end
@@ -114,8 +134,10 @@ showText(script_enabled, 3)
 onSwitchClick()
 switch.Activated:Connect(onSwitchClick)
 
--- ESP
+-- === ESP Setup with Name Label ===
+-- Function to create the ESP (Box + Name label)
 local function createESP(part, fruitName)
+    -- Create Box ESP
     local box = Instance.new("BoxHandleAdornment")
     box.Name = "FruitESP"
     box.Adornee = part
@@ -126,11 +148,12 @@ local function createESP(part, fruitName)
     box.Transparency = 0.5
     box.Parent = part
 
+    -- Create BillboardGui for fruit name label
     local billboard = Instance.new("BillboardGui")
     billboard.Name = "FruitLabel"
     billboard.Adornee = part
     billboard.Size = UDim2.new(0, 100, 0, 40)
-    billboard.StudsOffset = Vector3.new(0, 2.5, 0)
+    billboard.StudsOffset = Vector3.new(0, 2.5, 0)  -- Adjust offset to make it float above
     billboard.AlwaysOnTop = true
     billboard.Parent = part
 
@@ -145,22 +168,26 @@ local function createESP(part, fruitName)
     label.Parent = billboard
 end
 
+-- Function to remove ESP
 local function removeESP(fruit)
     local handle = fruit:FindFirstChild("Handle")
     if handle then
         local box = handle:FindFirstChild("FruitESP")
         if box then box:Destroy() end
+
         local label = handle:FindFirstChild("FruitLabel")
         if label then label:Destroy() end
     end
 end
 
+-- Add ESP to all existing fruits
 for _, fruit in pairs(workspace:GetChildren()) do
     if fruit.Name == "Fruit " and fruit:FindFirstChild("Handle") then
         createESP(fruit.Handle, fruit.Name)
     end
 end
 
+-- ESP on fruit spawn (new fruit added to the workspace)
 workspace.ChildAdded:Connect(function(child)
     if child.Name == "Fruit " and child:FindFirstChild("Handle") then
         local handle = child:WaitForChild("Handle", 5)
@@ -170,80 +197,69 @@ workspace.ChildAdded:Connect(function(child)
     end
 end)
 
+-- Cleanup on fruit despawn (fruit removed from the workspace)
 workspace.ChildRemoved:Connect(function(child)
     if child.Name == "Fruit " then
         removeESP(child)
     end
 end)
 
--- === GUI: Server Tools (Bottom of Screen) ===
+
+-- === Server Tools (Bottom of Screen) ===
 local screenGui = Instance.new("ScreenGui", player:WaitForChild("PlayerGui"))
 screenGui.Name = "ServerToolsGui"
 screenGui.ResetOnSpawn = false
 
+-- Main container
 local frame = Instance.new("Frame", screenGui)
-frame.Size = UDim2.new(0, 300, 0, 150)
-frame.Position = UDim2.new(1, -310, 1, -160)
+frame.Size = UDim2.new(0, 300, 0, 180)
+frame.Position = UDim2.new(1, -310, 1, -190)
 frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-frame.BackgroundTransparency = 0.3
+frame.BackgroundTransparency = 0.2
+frame.Name = "ServerToolsFrame"
 Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 8)
 
-local hopButton = Instance.new("TextButton", frame)
-hopButton.Size = UDim2.new(1, -20, 0, 30)
-hopButton.Position = UDim2.new(0, 10, 0, 10)
-hopButton.Text = "Hop to Random Server"
-hopButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-Instance.new("UICorner", hopButton)
+-- Auto-layout
+local layout = Instance.new("UIListLayout", frame)
+layout.Padding = UDim.new(0, 6)
+layout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+layout.SortOrder = Enum.SortOrder.LayoutOrder
 
-local copyButton = Instance.new("TextButton", frame)
-copyButton.Size = UDim2.new(1, -20, 0, 30)
-copyButton.Position = UDim2.new(0, 10, 0, 50)
-copyButton.Text = "Copy This Server ID"
-copyButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-Instance.new("UICorner", copyButton)
+-- Function to create styled buttons
+local function createButton(text)
+	local button = Instance.new("TextButton")
+	button.Size = UDim2.new(0, 280, 0, 32)
+	button.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+	button.TextColor3 = Color3.fromRGB(255, 255, 255)
+	button.Text = text
+	button.Font = Enum.Font.GothamBold
+	button.TextSize = 14
+	Instance.new("UICorner", button).CornerRadius = UDim.new(0, 6)
+	button.Parent = frame
+	return button
+end
 
-local inputBox = Instance.new("TextBox", frame)
-inputBox.Size = UDim2.new(1, -20, 0, 30)
-inputBox.Position = UDim2.new(0, 10, 0, 90)
-inputBox.PlaceholderText = "Enter Server ID..."
-inputBox.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-Instance.new("UICorner", inputBox)
-
-local joinButton = Instance.new("TextButton", frame)
-joinButton.Size = UDim2.new(1, -20, 0, 30)
-joinButton.Position = UDim2.new(0, 10, 0, 130)
-joinButton.Text = "Join Server by ID"
-joinButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-Instance.new("UICorner", joinButton)
-
--- === Server Actions ===
-hopButton.MouseButton1Click:Connect(function()
-    local HttpService = game:GetService("HttpService")
-    local TeleportService = game:GetService("TeleportService")
-    local success, result = pcall(function()
-        return HttpService:GetAsync("https://games.roblox.com/v1/games/" .. game.PlaceId .. "/servers/Public?sortOrder=Asc&limit=100")
-    end)
-
-    if success then
-        local servers = HttpService:JSONDecode(result)
-        for _, server in ipairs(servers.data) do
-            if server.id ~= game.JobId and server.playing < server.maxPlayers then
-                TeleportService:TeleportToPlaceInstance(game.PlaceId, server.id)
-                break
-            end
-        end
-    else
-        warn("Failed to get server list.")
-    end
+-- Button to teleport to the Fruit Server
+local teleportButton = createButton("Teleport to Fruit Server")
+teleportButton.MouseButton1Click:Connect(function()
+    -- Code to teleport player to a specified server
+    local serverId = "server-id-here"
+    game:GetService("TeleportService"):TeleportToPlaceInstance(game.PlaceId, serverId, player)
 end)
 
-copyButton.MouseButton1Click:Connect(function()
-    setclipboard(game.JobId)
+-- Button to copy Server ID
+local copyServerIdButton = createButton("Copy Server ID")
+copyServerIdButton.MouseButton1Click:Connect(function()
+    local serverId = game.JobId
+    setclipboard(serverId)
+    showText("Server ID copied: " .. serverId, 2)
 end)
 
-joinButton.MouseButton1Click:Connect(function()
-    local id = inputBox.Text
-    if id and id ~= "" then
-        game:GetService("TeleportService"):TeleportToPlaceInstance(game.PlaceId, id)
-    end
+-- Toggle visibility of server tools
+local toggleButton = createButton("Toggle Server Tools")
+toggleButton.MouseButton1Click:Connect(function()
+    frame.Visible = not frame.Visible
 end)
+
+-- Initial visibility setting
+frame.Visible = false
