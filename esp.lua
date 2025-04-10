@@ -15,7 +15,7 @@ local location = "FRUIT DETECTED: "
 local magnitude = "m away."
 local collected = "Fruit despawned/collected."
 
-if (game:GetService("LocalizationService").RobloxLocaleId == "pt-br") then
+if game:GetService("LocalizationService").RobloxLocaleId == "pt-br" then
     script_enabled = "Script ativado com sucesso."
     notifier_enabled = "Notificador ativado com sucesso."
     notifier_disabled = "Notificador desativado com sucesso."
@@ -53,7 +53,7 @@ local workspace_connection
 local function showText(text, time)
     label.Text = text
     label.Visible = true
-    if (time ~= 0) then
+    if time ~= 0 then
         task.wait(time)
         label.Visible = false
     end
@@ -111,7 +111,7 @@ showText(script_enabled, 3)
 onSwitchClick()
 switch.Activated:Connect(onSwitchClick)
 
--- === ESP Setup with Name Label ===
+-- === ESP Setup ===
 local function createESP(part, fruitName)
     local box = Instance.new("BoxHandleAdornment")
     box.Name = "FruitESP"
@@ -173,12 +173,12 @@ workspace.ChildRemoved:Connect(function(child)
     end
 end)
 
--- === HOP SERVER BUTTON ===
+-- === SERVER HOP, COPY, AND JOIN SETUP ===
 local TeleportService = game:GetService("TeleportService")
 local HttpService = game:GetService("HttpService")
 local placeId = game.PlaceId
 
--- Create GUI button
+-- Hop Button
 local hopButton = Instance.new("TextButton")
 hopButton.Name = "HopButton"
 hopButton.Text = "Hop Server"
@@ -189,9 +189,7 @@ hopButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 hopButton.Font = Enum.Font.GothamBold
 hopButton.TextScaled = true
 hopButton.Parent = gui
-
-local corner = Instance.new("UICorner", hopButton)
-corner.CornerRadius = UDim.new(0, 6)
+Instance.new("UICorner", hopButton).CornerRadius = UDim.new(0, 6)
 
 local function getDifferentServer()
     local servers = HttpService:JSONDecode(game:HttpGet(
@@ -211,5 +209,45 @@ hopButton.MouseButton1Click:Connect(function()
         TeleportService:TeleportToPlaceInstance(placeId, serverId, player)
     else
         showText("No other server found!", 3)
+    end
+end)
+
+-- Copy Server ID Button
+local copyButton = hopButton:Clone()
+copyButton.Name = "CopyButton"
+copyButton.Text = "Copy Server ID"
+copyButton.Position = UDim2.new(0, 10, 0, 290)
+copyButton.Parent = gui
+
+copyButton.MouseButton1Click:Connect(function()
+    setclipboard(game.JobId)
+    showText("Server ID copied!", 2)
+end)
+
+-- Join Server Input
+local inputBox = Instance.new("TextBox")
+inputBox.Name = "ServerInput"
+inputBox.PlaceholderText = "Enter Server ID"
+inputBox.Size = UDim2.new(0, 200, 0, 30)
+inputBox.Position = UDim2.new(0, 10, 0, 330)
+inputBox.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+inputBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+inputBox.Font = Enum.Font.Gotham
+inputBox.TextScaled = true
+inputBox.Parent = gui
+Instance.new("UICorner", inputBox).CornerRadius = UDim.new(0, 6)
+
+-- Join Server Button
+local joinButton = hopButton:Clone()
+joinButton.Text = "Join by ID"
+joinButton.Position = UDim2.new(0, 10, 0, 370)
+joinButton.Parent = gui
+
+joinButton.MouseButton1Click:Connect(function()
+    local id = inputBox.Text
+    if id and #id > 10 then
+        TeleportService:TeleportToPlaceInstance(placeId, id, player)
+    else
+        showText("Invalid Server ID", 2)
     end
 end)
