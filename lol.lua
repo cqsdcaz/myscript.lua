@@ -28,28 +28,42 @@ local function createGui()
         World = 1
     }
 
-    -- Function to fly to the target position
+    -- Function to make the player fly to the target position
     local function flyToTarget(targetPosition)
         local character = game.Players.LocalPlayer.Character
-        if character and character:FindFirstChild("HumanoidRootPart") then
-            local humanoidRootPart = character.HumanoidRootPart
-            local startPos = humanoidRootPart.Position
-            local endPos = targetPosition
-            local distance = (endPos - startPos).Magnitude
-            local speed = 50 -- Speed at which the player flies (change as needed)
-            
-            -- Fly to the target position
-            local direction = (endPos - startPos).Unit
-            local traveled = 0
-            while traveled < distance do
-                wait(0.03) -- Update every frame
-                local move = direction * speed * 0.03
-                humanoidRootPart.CFrame = humanoidRootPart.CFrame + move
-                traveled = (humanoidRootPart.Position - startPos).Magnitude
-            end
-            -- Set final position to the target
-            humanoidRootPart.CFrame = CFrame.new(endPos)
+        local humanoid = character:WaitForChild("Humanoid")
+        local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+        
+        -- Disable gravity and make the player fly
+        humanoid.PlatformStand = true
+        humanoid.UseJumpPower = false
+        humanoidRootPart.Anchored = false
+        
+        -- Create a BodyVelocity to move the player
+        local bodyVelocity = Instance.new("BodyVelocity")
+        bodyVelocity.MaxForce = Vector3.new(400000, 400000, 400000)  -- Allow strong movement
+        bodyVelocity.Velocity = Vector3.new(0, 50, 0)  -- Fly upwards initially
+        bodyVelocity.Parent = humanoidRootPart
+
+        -- Move towards the target position while flying
+        local startPos = humanoidRootPart.Position
+        local targetPos = targetPosition
+        local distance = (targetPos - startPos).Magnitude
+        local speed = 50 -- Speed at which the player flies (change as needed)
+
+        while (humanoidRootPart.Position - startPos).Magnitude < distance do
+            wait(0.03) -- Update every frame
+            local direction = (targetPos - humanoidRootPart.Position).Unit
+            bodyVelocity.Velocity = direction * speed + Vector3.new(0, 50, 0)  -- Apply the flying speed
         end
+        
+        -- Stop the BodyVelocity and place the player at the target position
+        bodyVelocity:Destroy()
+        humanoidRootPart.CFrame = CFrame.new(targetPos)
+        
+        -- Reset player gravity and jumping
+        humanoid.PlatformStand = false
+        humanoid.UseJumpPower = true
     end
 
     -- Button click event to start flying
