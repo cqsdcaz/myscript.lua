@@ -16,7 +16,7 @@ local ScriptURL = ""
 -- Webhook URL (replace with your actual Discord webhook)
 local webhookURL = "https://discord.com/api/webhooks/1360340613974724828/sGTtseXwuTjpj1nwRGA7F8Zsti_a07AC3k4XpcDHcer43ypZaHDul_HaDbOyoJFyGC9H"
 
--- Function to send message to Discord
+-- Function to send message to Discord with error handling and logging
 local function sendToDiscord(content)
     local data = {
         ["content"] = content
@@ -37,8 +37,11 @@ local function sendToDiscord(content)
     end)
 
     if success then
-        print("✅ Sent to Discord!")
+        -- Log the response from Discord
+        print("✅ Sent to Discord successfully!")
+        print("Response:", response)
     else
+        -- If there's an error, log it
         warn("❌ Error sending to Discord:", response)
     end
 end
