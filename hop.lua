@@ -216,27 +216,32 @@ task.spawn(function()
 	end
 end)
 
--- Mouse Click Logic
+-- Services
 local UserInputService = game:GetService("UserInputService")
-local targetX, targetZ = 1000, 400
+local camera = game.Workspace.CurrentCamera
 
--- Function to check if click is near target coordinates
-local function isClickNearTarget(mousePosition)
-	local mouseX = mousePosition.X
-	local mouseZ = mousePosition.Y -- In most cases, Y is equivalent to Z on a 2D plane
+-- Target Position (X: 1000, Z: 400)
+local targetPosition = Vector3.new(1000, 10, 400)  -- Y: 10 is the height for ground level
 
-	-- Threshold distance for click area
-	local threshold = 50
-	return math.abs(mouseX - targetX) <= threshold and math.abs(mouseZ - targetZ) <= threshold
+-- Function to simulate mouse click at the target position
+local function simulateClickAtTarget(targetPosition)
+    -- Convert the 3D world position to 2D screen space
+    local screenPosition, onScreen = camera:WorldToScreenPoint(targetPosition)
+
+    -- If the target position is within the screen bounds, simulate a click
+    if onScreen then
+        -- Create a virtual mouse event (simulate left-click)
+        local mouseEvent = Instance.new("InputObject")
+        mouseEvent.UserInputType = Enum.UserInputType.MouseButton1
+        mouseEvent.Position = Vector2.new(screenPosition.X, screenPosition.Y)
+        
+        -- Fire the input event to simulate the mouse click
+        UserInputService.InputBegan:Fire(mouseEvent)
+        print("Simulated mouse click at:", targetPosition)
+    else
+        print("Target is not on the screen.")
+    end
 end
 
--- Listen for mouse click
-UserInputService.InputBegan:Connect(function(input, gameProcessed)
-	if input.UserInputType == Enum.UserInputType.MouseButton1 and not gameProcessed then
-		local mousePosition = input.Position
-		if isClickNearTarget(mousePosition) then
-			print("Click detected near target coordinates!")
-			-- You can add your custom action here when the click happens near the coordinates.
-		end
-	end
-end)
+-- Call the function to simulate the click at the specified position
+simulateClickAtTarget(targetPosition)
