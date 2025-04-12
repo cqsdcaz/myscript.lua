@@ -17,15 +17,15 @@ local magnitude = "m away."
 local collected = "Fruit despawned/collected."
 
 if game:GetService("LocalizationService").RobloxLocaleId == "pt-br" then
-    script_enabled = "Script ativado com sucesso."
-    notifier_enabled = "Notificador ativado com sucesso."
-    notifier_disabled = "Notificador desativado com sucesso."
-    description = "Mostra a localização das frutas spawnadas."
-    on = "Notificador (ATIVADO)"
-    off = "Notificador (DESATIVADO)"
-    location = "FRUTA DETECTADA: "
-    magnitude = "m de distância."
-    collected = "Fruta despawnada/coletada."
+	script_enabled = "Script ativado com sucesso."
+	notifier_enabled = "Notificador ativado com sucesso."
+	notifier_disabled = "Notificador desativado com sucesso."
+	description = "Mostra a localização das frutas spawnadas."
+	on = "Notificador (ATIVADO)"
+	off = "Notificador (DESATIVADO)"
+	location = "FRUTA DETECTADA: "
+	magnitude = "m de distância."
+	collected = "Fruta despawnada/coletada."
 end
 
 if codes_button:FindFirstChild("NotifierLed") then return end
@@ -46,66 +46,66 @@ switch.Name = "NotifierSwitch"
 switch.Parent = dmg_counter_button.Parent
 
 settings_button.Activated:Connect(function()
-    switch.Visible = dmg_counter_button.Visible
+	switch.Visible = dmg_counter_button.Visible
 end)
 
 local workspace_connection
 
 local function showText(text, time)
-    label.Text = text
-    label.Visible = true
-    if time ~= 0 then
-        task.wait(time)
-        label.Visible = false
-    end
+	label.Text = text
+	label.Visible = true
+	if time ~= 0 then
+		task.wait(time)
+		label.Visible = false
+	end
 end
 
 local function playSound(asset_id, pb_speed)
-    local sound = Instance.new("Sound", workspace)
-    sound.SoundId = asset_id
-    sound.Volume = 1
-    sound.PlaybackSpeed = pb_speed
-    sound:Play()
-    sound.Ended:Connect(function() sound:Destroy() end)
+	local sound = Instance.new("Sound", workspace)
+	sound.SoundId = asset_id
+	sound.Volume = 1
+	sound.PlaybackSpeed = pb_speed
+	sound:Play()
+	sound.Ended:Connect(function() sound:Destroy() end)
 end
 
 local function enableNotifier(fruit)
-    local handle = fruit:WaitForChild("Handle")
-    local fruit_alive = true
-    playSound("rbxassetid://3997124966", 4)
-    while fruit_alive and workspace_connection do
-        local dist = math.floor((player.Character:WaitForChild("HumanoidRootPart").Position - handle.Position).Magnitude * 0.15)
-        showText(location .. dist .. magnitude, 0)
-        task.wait(0.2)
-        fruit_alive = workspace:FindFirstChild(fruit.Name)
-    end
-    if not fruit_alive then
-        playSound("rbxassetid://4612375233", 1)
-        showText(collected, 3)
-    end
+	local handle = fruit:WaitForChild("Handle")
+	local fruit_alive = true
+	playSound("rbxassetid://3997124966", 4)
+	while fruit_alive and workspace_connection do
+		local dist = math.floor((player.Character:WaitForChild("HumanoidRootPart").Position - handle.Position).Magnitude * 0.15)
+		showText(location .. dist .. magnitude, 0)
+		task.wait(0.2)
+		fruit_alive = workspace:FindFirstChild(fruit.Name)
+	end
+	if not fruit_alive then
+		playSound("rbxassetid://4612375233", 1)
+		showText(collected, 3)
+	end
 end
 
 local function onSwitchClick()
-    if workspace_connection then
-        workspace_connection:Disconnect()
-        workspace_connection = nil
-        led.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
-        switch.TextLabel.Text = off
-        showText(notifier_disabled, 2)
-    else
-        led.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
-        switch.TextLabel.Text = on
-        showText(notifier_enabled, 2)
-        workspace_connection = workspace.ChildAdded:Connect(function(child)
-            if child.Name == "Fruit " then
-                task.spawn(enableNotifier, child)
-            end
-        end)
-        local fruit = workspace:FindFirstChild("Fruit ")
-        if fruit then
-            task.spawn(enableNotifier, fruit)
-        end
-    end
+	if workspace_connection then
+		workspace_connection:Disconnect()
+		workspace_connection = nil
+		led.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+		switch.TextLabel.Text = off
+		showText(notifier_disabled, 2)
+	else
+		led.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
+		switch.TextLabel.Text = on
+		showText(notifier_enabled, 2)
+		workspace_connection = workspace.ChildAdded:Connect(function(child)
+			if child.Name == "Fruit " then
+				task.spawn(enableNotifier, child)
+			end
+		end)
+		local fruit = workspace:FindFirstChild("Fruit ")
+		if fruit then
+			task.spawn(enableNotifier, fruit)
+		end
+	end
 end
 
 showText(script_enabled, 3)
@@ -114,64 +114,64 @@ switch.Activated:Connect(onSwitchClick)
 
 -- ESP Section
 local function createESP(part, fruitName)
-    local box = Instance.new("BoxHandleAdornment")
-    box.Name = "FruitESP"
-    box.Adornee = part
-    box.AlwaysOnTop = true
-    box.ZIndex = 10
-    box.Size = part.Size + Vector3.new(0.2, 0.2, 0.2)
-    box.Color3 = Color3.fromRGB(255, 200, 0)
-    box.Transparency = 0.5
-    box.Parent = part
+	local box = Instance.new("BoxHandleAdornment")
+	box.Name = "FruitESP"
+	box.Adornee = part
+	box.AlwaysOnTop = true
+	box.ZIndex = 10
+	box.Size = part.Size + Vector3.new(0.2, 0.2, 0.2)
+	box.Color3 = Color3.fromRGB(255, 200, 0)
+	box.Transparency = 0.5
+	box.Parent = part
 
-    local billboard = Instance.new("BillboardGui")
-    billboard.Name = "FruitLabel"
-    billboard.Adornee = part
-    billboard.Size = UDim2.new(0, 100, 0, 40)
-    billboard.StudsOffset = Vector3.new(0, 2.5, 0)
-    billboard.AlwaysOnTop = true
-    billboard.Parent = part
+	local billboard = Instance.new("BillboardGui")
+	billboard.Name = "FruitLabel"
+	billboard.Adornee = part
+	billboard.Size = UDim2.new(0, 100, 0, 40)
+	billboard.StudsOffset = Vector3.new(0, 2.5, 0)
+	billboard.AlwaysOnTop = true
+	billboard.Parent = part
 
-    local label = Instance.new("TextLabel")
-    label.Size = UDim2.new(1, 0, 1, 0)
-    label.BackgroundTransparency = 1
-    label.Text = fruitName
-    label.TextColor3 = Color3.new(1, 1, 0)
-    label.TextStrokeTransparency = 0.5
-    label.TextScaled = true
-    label.Font = Enum.Font.GothamBold
-    label.Parent = billboard
+	local label = Instance.new("TextLabel")
+	label.Size = UDim2.new(1, 0, 1, 0)
+	label.BackgroundTransparency = 1
+	label.Text = fruitName
+	label.TextColor3 = Color3.new(1, 1, 0)
+	label.TextStrokeTransparency = 0.5
+	label.TextScaled = true
+	label.Font = Enum.Font.GothamBold
+	label.Parent = billboard
 end
 
 local function removeESP(fruit)
-    local handle = fruit:FindFirstChild("Handle")
-    if handle then
-        local box = handle:FindFirstChild("FruitESP")
-        if box then box:Destroy() end
-        local label = handle:FindFirstChild("FruitLabel")
-        if label then label:Destroy() end
-    end
+	local handle = fruit:FindFirstChild("Handle")
+	if handle then
+		local box = handle:FindFirstChild("FruitESP")
+		if box then box:Destroy() end
+		local label = handle:FindFirstChild("FruitLabel")
+		if label then label:Destroy() end
+	end
 end
 
 for _, fruit in pairs(workspace:GetChildren()) do
-    if fruit.Name == "Fruit " and fruit:FindFirstChild("Handle") then
-        createESP(fruit.Handle, fruit.Name)
-    end
+	if fruit.Name == "Fruit " and fruit:FindFirstChild("Handle") then
+		createESP(fruit.Handle, fruit.Name)
+	end
 end
 
 workspace.ChildAdded:Connect(function(child)
-    if child.Name == "Fruit " and child:FindFirstChild("Handle") then
-        local handle = child:WaitForChild("Handle", 5)
-        if handle then
-            createESP(handle, child.Name)
-        end
-    end
+	if child.Name == "Fruit " and child:FindFirstChild("Handle") then
+		local handle = child:WaitForChild("Handle", 5)
+		if handle then
+			createESP(handle, child.Name)
+		end
+	end
 end)
 
 workspace.ChildRemoved:Connect(function(child)
-    if child.Name == "Fruit " then
-        removeESP(child)
-    end
+	if child.Name == "Fruit " then
+		removeESP(child)
+	end
 end)
 
 -- Server hop logic
@@ -180,56 +180,63 @@ local HttpService = game:GetService("HttpService")
 local placeID = game.PlaceId
 
 local function hopServer()
-    local success, servers = pcall(function()
-        local response = game:HttpGet("https://games.roblox.com/v1/games/"..placeID.."/servers/Public?sortOrder=Asc&limit=100")
-        return HttpService:JSONDecode(response)
-    end)
+	local success, servers = pcall(function()
+		local response = game:HttpGet("https://games.roblox.com/v1/games/"..placeID.."/servers/Public?sortOrder=Asc&limit=100")
+		return HttpService:JSONDecode(response)
+	end)
 
-    if success and servers and servers.data then
-        for _, server in pairs(servers.data) do
-            if server.playing < server.maxPlayers then
-                TeleportService:TeleportToPlaceInstance(placeID, server.id)
-                break
-            end
-        end
-    end
+	if success and servers and servers.data then
+		for _, server in pairs(servers.data) do
+			if server.playing < server.maxPlayers then
+				TeleportService:TeleportToPlaceInstance(placeID, server.id)
+				break
+			end
+		end
+	end
 end
 
 -- Delay + fruit check before hopping
 task.spawn(function()
-    while true do
-        local fruit = workspace:FindFirstChild("Fruit ")
-        if not fruit then
-            local found = false
-            for i = 1, 10 do
-                task.wait(0.5)
-                if workspace:FindFirstChild("Fruit ") then
-                    found = true
-                    break
-                end
-            end
-            if not found then
-                hopServer()
-            end
-        end
-        task.wait(10)
-    end
+	while true do
+		local fruit = workspace:FindFirstChild("Fruit ")
+		if not fruit then
+			local found = false
+			for i = 1, 10 do
+				task.wait(0.5)
+				if workspace:FindFirstChild("Fruit ") then
+					found = true
+					break
+				end
+			end
+			if not found then
+				hopServer()
+			end
+		end
+		task.wait(10)
+	end
 end)
 
--- Auto Join Marine Team on First Join
-task.wait(1) -- Give the game a moment to load everything
+-- Mouse Click Logic
+local UserInputService = game:GetService("UserInputService")
+local targetX, targetZ = 1000, 400
 
-local Teams = game:GetService("Teams")
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local Player = game.Players.LocalPlayer
+-- Function to check if click is near target coordinates
+local function isClickNearTarget(mousePosition)
+	local mouseX = mousePosition.X
+	local mouseZ = mousePosition.Y -- In most cases, Y is equivalent to Z on a 2D plane
 
--- Try to find the event used to choose a team
-local event = ReplicatedStorage:FindFirstChild("Remotes"):FindFirstChild("CommF_")
-
-if Player.Team == nil or tostring(Player.Team) ~= "Marines" then
-    -- Wait for character to load just in case
-    Player.CharacterAdded:Wait()
-    
-    -- Trigger server to select Marine team
-    event:InvokeServer("SetTeam", "Marines")
+	-- Threshold distance for click area
+	local threshold = 50
+	return math.abs(mouseX - targetX) <= threshold and math.abs(mouseZ - targetZ) <= threshold
 end
+
+-- Listen for mouse click
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+	if input.UserInputType == Enum.UserInputType.MouseButton1 and not gameProcessed then
+		local mousePosition = input.Position
+		if isClickNearTarget(mousePosition) then
+			print("Click detected near target coordinates!")
+			-- You can add your custom action here when the click happens near the coordinates.
+		end
+	end
+end)
