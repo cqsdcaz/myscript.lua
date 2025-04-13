@@ -1,4 +1,4 @@
-local targetPosition = Vector3.new(638.4450073242188, 71.77000427246094, 918.2360229492188)
+local targetPosition = Vector3.new(3243.28516, 900.335388, -7151.17285, -0.939700961, 0, 0.341998369, 0, 1, 0, -0.341998369, 0, -0.939700961)
 
 -- Speed of flight (studs per second)
 local flightSpeed = 200
