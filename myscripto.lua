@@ -177,7 +177,7 @@ end
 local ToggleLabel = Instance.new("TextLabel")
 ToggleLabel.Parent = ScrollingFrame
 ToggleLabel.Size = UDim2.new(0, 200, 0, 30)
-ToggleLabel.Position = UDim2.new(0, 10, 0, 20)
+ToggleLabel.Position = UDim2.new(0, 30, 0, 20)
 ToggleLabel.BackgroundTransparency = 1
 ToggleLabel.Text = "Auto Farm:"
 ToggleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
