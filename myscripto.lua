@@ -59,7 +59,7 @@ createButton("Esp", "Esp", UDim2.new(0, 0, 0.648, 0))
 createButton("Hop", "Hop", UDim2.new(0, 0, 0.746, 0))
 createButton("SeaEvent", "Sea Event", UDim2.new(0, 0, 0.844, 0))
 
-
+end)
 local ScrollingFrame = Instance.new("ScrollingFrame")
 ScrollingFrame.Parent = Frame
 ScrollingFrame.Position = UDim2.new(0.276, 0, 0.091, 0)
@@ -69,6 +69,6 @@ ScrollingFrame.BorderSizePixel = 0
 ScrollingFrame.ScrollBarImageColor3 = Color3.fromRGB(0, 0, 0)
 ScrollingFrame.Visible = false
 
-end)
+
 
 
