@@ -47,7 +47,7 @@ CloseButton.Font = Enum.Font.LuckiestGuy
 
 CloseButton.MouseButton1Click:Connect(function()
 	ScreenGui:Destroy()
-end)
+
 
 -- Buttons
 createButton("MainFarm", "Main Farm", UDim2.new(0, 0, 0.140, 0))
@@ -68,5 +68,7 @@ ScrollingFrame.BackgroundColor3 = Color3.fromRGB(56, 56, 56)
 ScrollingFrame.BorderSizePixel = 0
 ScrollingFrame.ScrollBarImageColor3 = Color3.fromRGB(0, 0, 0)
 ScrollingFrame.Visible = false
+
+end)
 
 
