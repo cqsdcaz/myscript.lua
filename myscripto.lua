@@ -48,59 +48,6 @@ CloseButton.MouseButton1Click:Connect(function()
 	ScreenGui:Destroy()
 end)
 
-local function createCircleToggle(name, pos, parent, onToggle)
-	local ToggleFrame = Instance.new("Frame")
-	ToggleFrame.Name = name
-	ToggleFrame.Size = UDim2.new(0, 60, 0, 30)
-	ToggleFrame.Position = pos
-	ToggleFrame.BackgroundColor3 = Color3.fromRGB(90, 60, 60)
-	ToggleFrame.BorderSizePixel = 0
-	ToggleFrame.Parent = parent
-	ToggleFrame.ClipsDescendants = true
-
-	local Circle = Instance.new("Frame")
-	Circle.Size = UDim2.new(0, 26, 0, 26)
-	Circle.Position = UDim2.new(0, 2, 0, 2)
-	Circle.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-	Circle.BorderSizePixel = 0
-	Circle.Parent = ToggleFrame
-	Circle.AnchorPoint = Vector2.new(0, 0)
-	Circle.ZIndex = 2
-	Circle.Name = "Circle"
-
-	local UICornerToggle = Instance.new("UICorner")
-	UICornerToggle.CornerRadius = UDim.new(1, 0)
-	UICornerToggle.Parent = ToggleFrame
-
-	local UICornerCircle = Instance.new("UICorner")
-	UICornerCircle.CornerRadius = UDim.new(1, 0)
-	UICornerCircle.Parent = Circle
-
-	local isOn = false
-
-	local function updateVisual()
-		if isOn then
-			ToggleFrame.BackgroundColor3 = Color3.fromRGB(60, 160, 60)
-			Circle:TweenPosition(UDim2.new(0, 32, 0, 2), "Out", "Quad", 0.2, true)
-		else
-			ToggleFrame.BackgroundColor3 = Color3.fromRGB(90, 60, 60)
-			Circle:TweenPosition(UDim2.new(0, 2, 0, 2), "Out", "Quad", 0.2, true)
-		end
-	end
-
-	ToggleFrame.InputBegan:Connect(function(input)
-		if input.UserInputType == Enum.UserInputType.MouseButton1 then
-			isOn = not isOn
-			updateVisual()
-			if onToggle then
-				onToggle(isOn)
-			end
-		end
-	end)
-
-	updateVisual()
-	return ToggleFrame
-
 
 
 -- Scrolling Frame
