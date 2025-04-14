@@ -198,7 +198,7 @@ end)
 local AutoCheatsLabel = Instance.new("TextLabel")
 AutoCheatsLabel.Parent = ScrollingFrame
 AutoCheatsLabel.Size = UDim2.new(0, 200, 0, 30)
-AutoCheatsLabel.Position = UDim2.new(0, 5, 0, 60)  -- Adjust this to fit below Auto Farm
+AutoCheatsLabel.Position = UDim2.new(0, 25, 0, 60)  -- Adjust this to fit below Auto Farm
 AutoCheatsLabel.BackgroundTransparency = 1
 AutoCheatsLabel.Text = "Auto Cheats:"
 AutoCheatsLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
