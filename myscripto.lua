@@ -44,10 +44,11 @@ Title.TextSize = 16
 local CloseButton = createButton("Close", "X", UDim2.new(0.912, 0, 0, 0))
 CloseButton.Size = UDim2.new(0, 45, 0, 37)
 CloseButton.Font = Enum.Font.LuckiestGuy
-
 CloseButton.MouseButton1Click:Connect(function()
 	ScreenGui:Destroy()
+end)
 
+-- Scrolling Frame
 local ScrollingFrame = Instance.new("ScrollingFrame")
 ScrollingFrame.Parent = Frame
 ScrollingFrame.Position = UDim2.new(0.276, 0, 0.091, 0)
@@ -57,19 +58,13 @@ ScrollingFrame.BorderSizePixel = 0
 ScrollingFrame.ScrollBarImageColor3 = Color3.fromRGB(0, 0, 0)
 ScrollingFrame.Visible = false
 
-local LocalScript=Instance.new('LocalScript')
-LocalScript.Parent=Main Farm
-LocalScript.Source=local button = script.Parent
-local frame = button.Parent:WaitForChild("ScrollingFrame")
-
-button.MouseButton1Click:Connect(function()
-	frame.Visible = not frame.Visible
+-- Main Farm Button
+local MainFarm = createButton("MainFarm", "Main Farm", UDim2.new(0, 0, 0.140, 0))
+MainFarm.MouseButton1Click:Connect(function()
+	ScrollingFrame.Visible = not ScrollingFrame.Visible
 end)
 
-		
-
--- Buttons
-createButton("MainFarm", "Main Farm", UDim2.new(0, 0, 0.140, 0))
+-- Other Buttons (no functionality yet)
 createButton("Teleport", "Teleport", UDim2.new(0, 0, 0.238, 0))
 createButton("Fruits", "Fruits", UDim2.new(0, 0, 0.336, 0))
 createButton("FarmMaterial", "Farm Material", UDim2.new(0, 0, 0.452, 0))
@@ -77,7 +72,3 @@ createButton("PvpSettings", "Pvp Settings", UDim2.new(0, 0, 0.550, 0))
 createButton("Esp", "Esp", UDim2.new(0, 0, 0.648, 0))
 createButton("Hop", "Hop", UDim2.new(0, 0, 0.746, 0))
 createButton("SeaEvent", "Sea Event", UDim2.new(0, 0, 0.844, 0))
-
-
-
-
