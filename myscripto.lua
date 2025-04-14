@@ -47,6 +47,17 @@ CloseButton.Font = Enum.Font.LuckiestGuy
 
 CloseButton.MouseButton1Click:Connect(function()
 	ScreenGui:Destroy()
+
+local ScrollingFrame = Instance.new("ScrollingFrame")
+ScrollingFrame.Parent = Frame
+ScrollingFrame.Position = UDim2.new(0.276, 0, 0.091, 0)
+ScrollingFrame.Size = UDim2.new(0, 371, 0, 336)
+ScrollingFrame.BackgroundColor3 = Color3.fromRGB(56, 56, 56)
+ScrollingFrame.BorderSizePixel = 0
+ScrollingFrame.ScrollBarImageColor3 = Color3.fromRGB(0, 0, 0)
+ScrollingFrame.Visible = false
+
+		
 end)
 
 -- Buttons
@@ -60,13 +71,5 @@ createButton("Hop", "Hop", UDim2.new(0, 0, 0.746, 0))
 createButton("SeaEvent", "Sea Event", UDim2.new(0, 0, 0.844, 0))
 
 
-local ScrollingFrame = Instance.new("ScrollingFrame")
-ScrollingFrame.Parent = Frame
-ScrollingFrame.Position = UDim2.new(0.276, 0, 0.091, 0)
-ScrollingFrame.Size = UDim2.new(0, 371, 0, 336)
-ScrollingFrame.BackgroundColor3 = Color3.fromRGB(56, 56, 56)
-ScrollingFrame.BorderSizePixel = 0
-ScrollingFrame.ScrollBarImageColor3 = Color3.fromRGB(0, 0, 0)
-ScrollingFrame.Visible = false
 
 
