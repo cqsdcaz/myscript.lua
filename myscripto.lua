@@ -177,7 +177,7 @@ end
 local ToggleLabel = Instance.new("TextLabel")
 ToggleLabel.Parent = ScrollingFrame
 ToggleLabel.Size = UDim2.new(0, 200, 0, 30)
-ToggleLabel.Position = UDim2.new(0, 5, 0, 20)
+ToggleLabel.Position = UDim2.new(0, 25, 0, 20)
 ToggleLabel.BackgroundTransparency = 1
 ToggleLabel.Text = "Auto Farm:"
 ToggleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -190,7 +190,7 @@ createCircleToggle("AutoFarmToggle", UDim2.new(0, 250, 0, 20), ScrollingFrame, f
 end)
 
 -- Add another toggle for "Auto Cheats" below your existing Auto Farm toggle
-createCircleToggle("AutoCheatsToggle", UDim2.new(0, 220, 0, 70), ScrollingFrame, function(state)
+createCircleToggle("AutoCheatsToggle", UDim2.new(0, 250, 0, 70), ScrollingFrame, function(state)
     print("Auto Cheats:", state and "ON" or "OFF")
 end)
 
