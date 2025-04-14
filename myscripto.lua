@@ -36,7 +36,7 @@ Title.BackgroundColor3 = Color3.fromRGB(56, 56, 56)
 Title.BorderColor3 = Color3.fromRGB(34, 34, 34)
 Title.BorderSizePixel = 0
 Title.Font = Enum.Font.DenkOne
-Title.Text = "My Menu"
+Title.Text = "SkillTime"
 Title.TextColor3 = Color3.fromRGB(255, 255, 255)
 Title.TextSize = 16
 
