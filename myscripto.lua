@@ -187,4 +187,22 @@ ToggleLabel.TextXAlignment = Enum.TextXAlignment.Left
 
 createCircleToggle("AutoFarmToggle", UDim2.new(0, 220, 0, 20), ScrollingFrame, function(state)
 	print("Auto Farm:", state and "ON" or "OFF")
+
+-- Add another toggle for "Auto Cheats" below your existing Auto Farm toggle
+createCircleToggle("AutoCheatsToggle", UDim2.new(0, 220, 0, 70), ScrollingFrame, function(state)
+	print("Auto Cheats:", state and "ON" or "OFF")
+end)
+
+-- Add a label for the Auto Cheats toggle to differentiate it
+local AutoCheatsLabel = Instance.new("TextLabel")
+AutoCheatsLabel.Parent = ScrollingFrame
+AutoCheatsLabel.Size = UDim2.new(0, 200, 0, 30)
+AutoCheatsLabel.Position = UDim2.new(0, 10, 0, 60)  -- Adjust this to fit below Auto Farm
+AutoCheatsLabel.BackgroundTransparency = 1
+AutoCheatsLabel.Text = "Auto Cheats:"
+AutoCheatsLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+AutoCheatsLabel.Font = Enum.Font.DenkOne
+AutoCheatsLabel.TextSize = 18
+AutoCheatsLabel.TextXAlignment = Enum.TextXAlignment.Left
+
 end)
