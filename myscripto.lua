@@ -57,8 +57,16 @@ ScrollingFrame.BorderSizePixel = 0
 ScrollingFrame.ScrollBarImageColor3 = Color3.fromRGB(0, 0, 0)
 ScrollingFrame.Visible = false
 
-		
+local LocalScript=Instance.new('LocalScript')
+LocalScript.Parent=Main Farm
+LocalScript.Source=local button = script.Parent
+local frame = button.Parent:WaitForChild("ScrollingFrame")
+
+button.MouseButton1Click:Connect(function()
+	frame.Visible = not frame.Visible
 end)
+
+		
 
 -- Buttons
 createButton("MainFarm", "Main Farm", UDim2.new(0, 0, 0.140, 0))
