@@ -36,7 +36,7 @@ Title.BackgroundColor3 = Color3.fromRGB(56, 56, 56)
 Title.BorderColor3 = Color3.fromRGB(34, 34, 34)
 Title.BorderSizePixel = 0
 Title.Font = Enum.Font.DenkOne
-Title.Text = "SkillTime"
+Title.Text = "My Menu"
 Title.TextColor3 = Color3.fromRGB(255, 255, 255)
 Title.TextSize = 16
 
@@ -47,8 +47,8 @@ CloseButton.Font = Enum.Font.LuckiestGuy
 
 CloseButton.MouseButton1Click:Connect(function()
 	ScreenGui:Destroy()
-
 end)
+
 -- Buttons
 createButton("MainFarm", "Main Farm", UDim2.new(0, 0, 0.140, 0))
 createButton("Teleport", "Teleport", UDim2.new(0, 0, 0.238, 0))
@@ -68,7 +68,5 @@ ScrollingFrame.BackgroundColor3 = Color3.fromRGB(56, 56, 56)
 ScrollingFrame.BorderSizePixel = 0
 ScrollingFrame.ScrollBarImageColor3 = Color3.fromRGB(0, 0, 0)
 ScrollingFrame.Visible = false
-
-
 
 
