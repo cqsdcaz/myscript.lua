@@ -27,7 +27,10 @@ frame.Size = UDim2.new(0, 200, 0, 200)
 frame.Position = UDim2.new(0, 10, 0.5, -100)
 frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 frame.BackgroundTransparency = 0.2
+frame.Active = true -- Required to make draggable
+frame.Draggable = true -- Allows dragging
 frame.Parent = screenGui
+
 
 local layout = Instance.new("UIListLayout")
 layout.Padding = UDim.new(0, 5)
