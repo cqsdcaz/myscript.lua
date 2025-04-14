@@ -72,7 +72,7 @@ createButton("PvpSettings", "Pvp Settings", UDim2.new(0, 0, 0.550, 0))
 createButton("Esp", "Esp", UDim2.new(0, 0, 0.648, 0))
 createButton("Hop", "Hop", UDim2.new(0, 0, 0.746, 0))
 createButton("SeaEvent", "Sea Event", UDim2.new(0, 0, 0.844, 0))
-
+end)
 local UserInputService = game:GetService("UserInputService")
 
 local function makeDraggable(frame)
