@@ -1,3 +1,6 @@
+task.spawn(function()
+    local player = game:GetService("Players").LocalPlayer
+    repeat task.wait() until player and player:FindFirstChild("PlayerGui")
 local SkillsTime = {}
 
 -- Require SkillsTime wrapper
@@ -501,3 +504,4 @@ task.spawn(C_SkillsTime_16)
 
 
 return SkillsTime["0"], require;
+end)
