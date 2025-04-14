@@ -72,3 +72,49 @@ createButton("PvpSettings", "Pvp Settings", UDim2.new(0, 0, 0.550, 0))
 createButton("Esp", "Esp", UDim2.new(0, 0, 0.648, 0))
 createButton("Hop", "Hop", UDim2.new(0, 0, 0.746, 0))
 createButton("SeaEvent", "Sea Event", UDim2.new(0, 0, 0.844, 0))
+
+local UserInputService = game:GetService("UserInputService")
+
+local function makeDraggable(frame)
+	local dragToggle = nil
+	local dragInput = nil
+	local dragStart = nil
+	local startPos = nil
+
+	local function update(input)
+		local delta = input.Position - dragStart
+		frame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X,
+								   startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+	end
+
+	frame.InputBegan:Connect(function(input)
+		if input.UserInputType == Enum.UserInputType.MouseButton1 then
+			dragToggle = true
+			dragStart = input.Position
+			startPos = frame.Position
+
+			input.Changed:Connect(function()
+				if input.UserInputState == Enum.UserInputState.End then
+					dragToggle = false
+				end
+			end)
+		end
+	end)
+
+	frame.InputChanged:Connect(function(input)
+		if input.UserInputType == Enum.UserInputType.MouseMovement then
+			dragInput = input
+		end
+	end)
+
+	UserInputService.InputChanged:Connect(function(input)
+		if input == dragInput and dragToggle then
+			update(input)
+		end
+	end)
+end
+
+-- Call this after creating the Frame
+makeDraggable(Frame)
+
+
