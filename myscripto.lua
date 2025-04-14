@@ -205,3 +205,71 @@ AutoCheatsLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
 AutoCheatsLabel.Font = Enum.Font.DenkOne
 AutoCheatsLabel.TextSize = 18
 AutoCheatsLabel.TextXAlignment = Enum.TextXAlignment.Left
+
+
+--// Services
+local Players = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
+
+--// Player Setup
+local player = Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+
+--// Variables
+local flightSpeed = 200
+local chests = workspace:WaitForChild("ChestModels"):GetChildren()
+local locations = workspace:WaitForChild("_WorldOrigin"):WaitForChild("Locations"):GetChildren()
+local isFlying = false
+
+--// Function to move the player to a target position (chest or location)
+local function moveToTarget(target)
+    local targetPosition = target.Position
+    local distance = (targetPosition - humanoidRootPart.Position).Magnitude
+
+    -- Calculate the time it will take to reach the target based on flight speed
+    local timeToReach = distance / flightSpeed
+
+    -- Create a Tween to move the player smoothly towards the target
+    local tweenInfo = TweenInfo.new(timeToReach, Enum.EasingStyle.Linear, Enum.EasingDirection.Out)
+    local goal = {Position = targetPosition}
+
+    local tween = TweenService:Create(humanoidRootPart, tweenInfo, goal)
+    tween:Play()
+    tween.Completed:Wait()
+end
+
+--// Function to start the flight to chests, and if none, fly to locations
+local function flyToTargets()
+    if #chests > 0 then
+        -- If there are chests, fly to each one
+        for _, chest in ipairs(chests) do
+            if isFlying then
+                moveToTarget(chest)
+            end
+        end
+    else
+        -- If no chests found, fly to locations
+        for _, location in ipairs(locations) do
+            if isFlying then
+                moveToTarget(location)
+            end
+        end
+    end
+end
+
+--// CreateCircleToggle Setup (You should replace this with your actual toggle)
+local createCircleToggle = script:WaitForChild("CreateCircleToggle")  -- Replace with your actual toggle path
+
+--// Function to handle the toggle being on or off
+createCircleToggle.OnToggle:Connect(function(isToggled)
+    if isToggled then
+        -- If toggled on, start flying to targets (chests or locations)
+        isFlying = true
+        flyToTargets()
+    else
+        -- If toggled off, stop flying (or handle accordingly)
+        isFlying = false
+        print("Flying stopped")
+    end
+end)
