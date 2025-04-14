@@ -13,18 +13,18 @@ Frame.Active = true
 
 -- Create a button utility function
 local function createButton(name, text, pos)
-	local btn = Instance.new("TextButton")
-	btn.Name = name
-	btn.Text = text
-	btn.Parent = Frame
-	btn.Size = UDim2.new(0, 142, 0, 37)
-	btn.Position = pos
-	btn.BackgroundColor3 = Color3.fromRGB(56, 56, 56)
-	btn.BorderSizePixel = 0
-	btn.Font = Enum.Font.DenkOne
-	btn.TextColor3 = Color3.fromRGB(255, 255, 255)
-	btn.TextSize = 14
-	return btn
+    local btn = Instance.new("TextButton")
+    btn.Name = name
+    btn.Text = text
+    btn.Parent = Frame
+    btn.Size = UDim2.new(0, 142, 0, 37)
+    btn.Position = pos
+    btn.BackgroundColor3 = Color3.fromRGB(56, 56, 56)
+    btn.BorderSizePixel = 0
+    btn.Font = Enum.Font.DenkOne
+    btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    btn.TextSize = 14
+    return btn
 end
 
 -- Title label
@@ -45,7 +45,7 @@ local CloseButton = createButton("Close", "X", UDim2.new(0.912, 0, 0, 0))
 CloseButton.Size = UDim2.new(0, 45, 0, 37)
 CloseButton.Font = Enum.Font.LuckiestGuy
 CloseButton.MouseButton1Click:Connect(function()
-	ScreenGui:Destroy()
+    ScreenGui:Destroy()
 end)
 
 -- Scrolling Frame
@@ -62,7 +62,7 @@ ScrollingFrame.CanvasSize = UDim2.new(0, 0, 2, 0) -- Allow scrolling if needed
 -- Main Farm Button
 local MainFarm = createButton("MainFarm", "Main Farm", UDim2.new(0, 0, 0.140, 0))
 MainFarm.MouseButton1Click:Connect(function()
-	ScrollingFrame.Visible = not ScrollingFrame.Visible
+    ScrollingFrame.Visible = not ScrollingFrame.Visible
 end)
 
 -- Other Buttons
@@ -78,99 +78,99 @@ createButton("SeaEvent", "Sea Event", UDim2.new(0, 0, 0.844, 0))
 local UserInputService = game:GetService("UserInputService")
 
 local function makeDraggable(frame)
-	local dragToggle = nil
-	local dragInput = nil
-	local dragStart = nil
-	local startPos = nil
+    local dragToggle = nil
+    local dragInput = nil
+    local dragStart = nil
+    local startPos = nil
 
-	local function update(input)
-		local delta = input.Position - dragStart
-		frame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X,
-								   startPos.Y.Scale, startPos.Y.Offset + delta.Y)
-	end
+    local function update(input)
+        local delta = input.Position - dragStart
+        frame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X,
+                                    startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+    end
 
-	frame.InputBegan:Connect(function(input)
-		if input.UserInputType == Enum.UserInputType.MouseButton1 then
-			dragToggle = true
-			dragStart = input.Position
-			startPos = frame.Position
+    frame.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragToggle = true
+            dragStart = input.Position
+            startPos = frame.Position
 
-			input.Changed:Connect(function()
-				if input.UserInputState == Enum.UserInputState.End then
-					dragToggle = false
-				end
-			end)
-		end
-	end)
+            input.Changed:Connect(function()
+                if input.UserInputState == Enum.UserInputState.End then
+                    dragToggle = false
+                end
+            end)
+        end
+    end)
 
-	frame.InputChanged:Connect(function(input)
-		if input.UserInputType == Enum.UserInputType.MouseMovement then
-			dragInput = input
-		end
-	end)
+    frame.InputChanged:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseMovement then
+            dragInput = input
+        end
+    end)
 
-	UserInputService.InputChanged:Connect(function(input)
-		if input == dragInput and dragToggle then
-			update(input)
-		end
-	end)
+    UserInputService.InputChanged:Connect(function(input)
+        if input == dragInput and dragToggle then
+            update(input)
+        end
+    end)
 end
 
 makeDraggable(Frame)
 
 -- 🔘 Circle Toggle Function
 local function createCircleToggle(name, pos, parent, onToggle)
-	local ToggleFrame = Instance.new("Frame")
-	ToggleFrame.Name = name
-	ToggleFrame.Size = UDim2.new(0, 60, 0, 30)
-	ToggleFrame.Position = pos
-	ToggleFrame.BackgroundColor3 = Color3.fromRGB(90, 60, 60)
-	ToggleFrame.BorderSizePixel = 0
-	ToggleFrame.Parent = parent
-	ToggleFrame.ClipsDescendants = true
+    local ToggleFrame = Instance.new("Frame")
+    ToggleFrame.Name = name
+    ToggleFrame.Size = UDim2.new(0, 60, 0, 30)
+    ToggleFrame.Position = pos
+    ToggleFrame.BackgroundColor3 = Color3.fromRGB(90, 60, 60)
+    ToggleFrame.BorderSizePixel = 0
+    ToggleFrame.Parent = parent
+    ToggleFrame.ClipsDescendants = true
 
-	local Circle = Instance.new("Frame")
-	Circle.Size = UDim2.new(0, 26, 0, 26)
-	Circle.Position = UDim2.new(0, 2, 0, 2)
-	Circle.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-	Circle.BorderSizePixel = 0
-	Circle.Parent = ToggleFrame
-	Circle.AnchorPoint = Vector2.new(0, 0)
-	Circle.ZIndex = 2
-	Circle.Name = "Circle"
+    local Circle = Instance.new("Frame")
+    Circle.Size = UDim2.new(0, 26, 0, 26)
+    Circle.Position = UDim2.new(0, 2, 0, 2)
+    Circle.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    Circle.BorderSizePixel = 0
+    Circle.Parent = ToggleFrame
+    Circle.AnchorPoint = Vector2.new(0, 0)
+    Circle.ZIndex = 2
+    Circle.Name = "Circle"
 
-	local UICornerToggle = Instance.new("UICorner")
-	UICornerToggle.CornerRadius = UDim.new(1, 0)
-	UICornerToggle.Parent = ToggleFrame
+    local UICornerToggle = Instance.new("UICorner")
+    UICornerToggle.CornerRadius = UDim.new(1, 0)
+    UICornerToggle.Parent = ToggleFrame
 
-	local UICornerCircle = Instance.new("UICorner")
-	UICornerCircle.CornerRadius = UDim.new(1, 0)
-	UICornerCircle.Parent = Circle
+    local UICornerCircle = Instance.new("UICorner")
+    UICornerCircle.CornerRadius = UDim.new(1, 0)
+    UICornerCircle.Parent = Circle
 
-	local isOn = false
+    local isOn = false
 
-	local function updateVisual()
-		if isOn then
-			ToggleFrame.BackgroundColor3 = Color3.fromRGB(60, 160, 60)
-			Circle:TweenPosition(UDim2.new(0, 32, 0, 2), "Out", "Quad", 0.2, true)
-		else
-			ToggleFrame.BackgroundColor3 = Color3.fromRGB(90, 60, 60)
-			Circle:TweenPosition(UDim2.new(0, 2, 0, 2), "Out", "Quad", 0.2, true)
-		end
-	end
+    local function updateVisual()
+        if isOn then
+            ToggleFrame.BackgroundColor3 = Color3.fromRGB(60, 160, 60)
+            Circle:TweenPosition(UDim2.new(0, 32, 0, 2), "Out", "Quad", 0.2, true)
+        else
+            ToggleFrame.BackgroundColor3 = Color3.fromRGB(90, 60, 60)
+            Circle:TweenPosition(UDim2.new(0, 2, 0, 2), "Out", "Quad", 0.2, true)
+        end
+    end
 
-	ToggleFrame.InputBegan:Connect(function(input)
-		if input.UserInputType == Enum.UserInputType.MouseButton1 then
-			isOn = not isOn
-			updateVisual()
-			if onToggle then
-				onToggle(isOn)
-			end
-		end
-	end)
+    ToggleFrame.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            isOn = not isOn
+            updateVisual()
+            if onToggle then
+                onToggle(isOn)
+            end
+        end
+    end)
 
-	updateVisual()
-	return ToggleFrame
+    updateVisual()
+    return ToggleFrame
 end
 
 -- ✅ Add Toggle & Label to Scrolling Frame
@@ -186,12 +186,12 @@ ToggleLabel.TextSize = 18
 ToggleLabel.TextXAlignment = Enum.TextXAlignment.Left
 
 createCircleToggle("AutoFarmToggle", UDim2.new(0, 220, 0, 20), ScrollingFrame, function(state)
-	print("Auto Farm:", state and "ON" or "OFF")
+    print("Auto Farm:", state and "ON" or "OFF")
 end)
 
 -- Add another toggle for "Auto Cheats" below your existing Auto Farm toggle
 createCircleToggle("AutoCheatsToggle", UDim2.new(0, 220, 0, 70), ScrollingFrame, function(state)
-	print("Auto Cheats:", state and "ON" or "OFF")
+    print("Auto Cheats:", state and "ON" or "OFF")
 end)
 
 -- Add a label for the Auto Cheats toggle to differentiate it
