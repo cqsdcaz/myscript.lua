@@ -11,7 +11,7 @@ local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
 local teleportLocations = {
     ["Sky Base"] = CFrame.new(3243.28516, 900.335388, -7151.17285) * CFrame.Angles(0, math.rad(160), 0),
     ["Mountain Top"] = CFrame.new(-361, 615.127991, 111.557007, 1, 0, 0, 0, 1, 0, 0, 0, 1) * CFrame.Angles(0, math.rad(90), 0),
-    ["Secret Cave"] = CFrame.new(1800, 100, -7200) * CFrame.Angles(0, math.rad(0), 0),
+    ["Secret Cave"] = CFrame.new(-28064.8496, 0, -18451.5488, 1, 0, 0, 0, 1, 0, 0, 0, 1) * CFrame.Angles(0, math.rad(0), 0),
 }
 
 local flightSpeed = 200
