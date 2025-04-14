@@ -10,8 +10,8 @@ Frame.Position = UDim2.new(0.236, 0, 0.183, 0)
 Frame.BackgroundColor3 = Color3.fromRGB(56, 56, 56)
 Frame.BorderSizePixel = 0
 Frame.Active = true
---Frame.Draggable = true
 
+-- Create a button utility function
 local function createButton(name, text, pos)
 	local btn = Instance.new("TextButton")
 	btn.Name = name
@@ -36,7 +36,7 @@ Title.BackgroundColor3 = Color3.fromRGB(56, 56, 56)
 Title.BorderColor3 = Color3.fromRGB(34, 34, 34)
 Title.BorderSizePixel = 0
 Title.Font = Enum.Font.DenkOne
-Title.Text = "SkillTime"
+Title.Text = "My Menu"
 Title.TextColor3 = Color3.fromRGB(255, 255, 255)
 Title.TextSize = 16
 
@@ -48,8 +48,6 @@ CloseButton.MouseButton1Click:Connect(function()
 	ScreenGui:Destroy()
 end)
 
-
-
 -- Scrolling Frame
 local ScrollingFrame = Instance.new("ScrollingFrame")
 ScrollingFrame.Parent = Frame
@@ -59,6 +57,7 @@ ScrollingFrame.BackgroundColor3 = Color3.fromRGB(56, 56, 56)
 ScrollingFrame.BorderSizePixel = 0
 ScrollingFrame.ScrollBarImageColor3 = Color3.fromRGB(0, 0, 0)
 ScrollingFrame.Visible = false
+ScrollingFrame.CanvasSize = UDim2.new(0, 0, 2, 0) -- Allow scrolling if needed
 
 -- Main Farm Button
 local MainFarm = createButton("MainFarm", "Main Farm", UDim2.new(0, 0, 0.140, 0))
@@ -66,7 +65,7 @@ MainFarm.MouseButton1Click:Connect(function()
 	ScrollingFrame.Visible = not ScrollingFrame.Visible
 end)
 
--- Other Buttons (no functionality yet)
+-- Other Buttons
 createButton("Teleport", "Teleport", UDim2.new(0, 0, 0.238, 0))
 createButton("Fruits", "Fruits", UDim2.new(0, 0, 0.336, 0))
 createButton("FarmMaterial", "Farm Material", UDim2.new(0, 0, 0.452, 0))
@@ -75,6 +74,7 @@ createButton("Esp", "Esp", UDim2.new(0, 0, 0.648, 0))
 createButton("Hop", "Hop", UDim2.new(0, 0, 0.746, 0))
 createButton("SeaEvent", "Sea Event", UDim2.new(0, 0, 0.844, 0))
 
+-- Make frame draggable
 local UserInputService = game:GetService("UserInputService")
 
 local function makeDraggable(frame)
@@ -116,7 +116,75 @@ local function makeDraggable(frame)
 	end)
 end
 
--- Call this after creating the Frame
 makeDraggable(Frame)
 
+-- 🔘 Circle Toggle Function
+local function createCircleToggle(name, pos, parent, onToggle)
+	local ToggleFrame = Instance.new("Frame")
+	ToggleFrame.Name = name
+	ToggleFrame.Size = UDim2.new(0, 60, 0, 30)
+	ToggleFrame.Position = pos
+	ToggleFrame.BackgroundColor3 = Color3.fromRGB(90, 60, 60)
+	ToggleFrame.BorderSizePixel = 0
+	ToggleFrame.Parent = parent
+	ToggleFrame.ClipsDescendants = true
 
+	local Circle = Instance.new("Frame")
+	Circle.Size = UDim2.new(0, 26, 0, 26)
+	Circle.Position = UDim2.new(0, 2, 0, 2)
+	Circle.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+	Circle.BorderSizePixel = 0
+	Circle.Parent = ToggleFrame
+	Circle.AnchorPoint = Vector2.new(0, 0)
+	Circle.ZIndex = 2
+	Circle.Name = "Circle"
+
+	local UICornerToggle = Instance.new("UICorner")
+	UICornerToggle.CornerRadius = UDim.new(1, 0)
+	UICornerToggle.Parent = ToggleFrame
+
+	local UICornerCircle = Instance.new("UICorner")
+	UICornerCircle.CornerRadius = UDim.new(1, 0)
+	UICornerCircle.Parent = Circle
+
+	local isOn = false
+
+	local function updateVisual()
+		if isOn then
+			ToggleFrame.BackgroundColor3 = Color3.fromRGB(60, 160, 60)
+			Circle:TweenPosition(UDim2.new(0, 32, 0, 2), "Out", "Quad", 0.2, true)
+		else
+			ToggleFrame.BackgroundColor3 = Color3.fromRGB(90, 60, 60)
+			Circle:TweenPosition(UDim2.new(0, 2, 0, 2), "Out", "Quad", 0.2, true)
+		end
+	end
+
+	ToggleFrame.InputBegan:Connect(function(input)
+		if input.UserInputType == Enum.UserInputType.MouseButton1 then
+			isOn = not isOn
+			updateVisual()
+			if onToggle then
+				onToggle(isOn)
+			end
+		end
+	end)
+
+	updateVisual()
+	return ToggleFrame
+end
+
+-- ✅ Add Toggle & Label to Scrolling Frame
+local ToggleLabel = Instance.new("TextLabel")
+ToggleLabel.Parent = ScrollingFrame
+ToggleLabel.Size = UDim2.new(0, 200, 0, 30)
+ToggleLabel.Position = UDim2.new(0, 10, 0, 20)
+ToggleLabel.BackgroundTransparency = 1
+ToggleLabel.Text = "Auto Farm:"
+ToggleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+ToggleLabel.Font = Enum.Font.DenkOne
+ToggleLabel.TextSize = 18
+ToggleLabel.TextXAlignment = Enum.TextXAlignment.Left
+
+createCircleToggle("AutoFarmToggle", UDim2.new(0, 220, 0, 20), ScrollingFrame, function(state)
+	print("Auto Farm:", state and "ON" or "OFF")
+end)
