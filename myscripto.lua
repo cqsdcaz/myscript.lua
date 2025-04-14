@@ -185,7 +185,7 @@ ToggleLabel.Font = Enum.Font.DenkOne
 ToggleLabel.TextSize = 18
 ToggleLabel.TextXAlignment = Enum.TextXAlignment.Left
 
-createCircleToggle("AutoFarmToggle", UDim2.new(0, 220, 0, 20), ScrollingFrame, function(state)
+createCircleToggle("AutoFarmToggle", UDim2.new(0, 250, 0, 20), ScrollingFrame, function(state)
     print("Auto Farm:", state and "ON" or "OFF")
 end)
 
