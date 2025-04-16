@@ -27,11 +27,13 @@ local locationList = {
 	locations.Whirlpool,
 }
 
+-- Get HRP (HumanoidRootPart)
 local function getCharacterHRP()
 	local character = player.Character or player.CharacterAdded:Wait()
 	return character:WaitForChild("HumanoidRootPart")
 end
 
+-- Function to tween the player to a target position
 local function tweenToPosition(hrp, targetPos)
 	local distance = (hrp.Position - targetPos).Magnitude
 	local speed = 200
@@ -45,16 +47,20 @@ local function tweenToPosition(hrp, targetPos)
 	tween.Completed:Wait()
 end
 
-local function findChests()
+-- Find specific chests (Diamond, Gold, Silver)
+local function findSpecificChests()
 	local chests = {}
 	for _, obj in ipairs(chestFolder:GetChildren()) do
-		if obj:IsA("Model") and obj:FindFirstChild("PrimaryPart") then
-			table.insert(chests, obj)
+		if obj:IsA("Model") and (obj.Name == "DiamondChest" or obj.Name == "GoldChest" or obj.Name == "SilverChest") then
+			if obj:FindFirstChild("PrimaryPart") then
+				table.insert(chests, obj)
+			end
 		end
 	end
 	return chests
 end
 
+-- Get the closest location to the player
 local function getClosestLocation(hrp)
 	local closest = nil
 	local minDist = math.huge
@@ -70,28 +76,31 @@ local function getClosestLocation(hrp)
 	return closest
 end
 
+-- Fly to the chests or the nearest location if no chests are found
 local function flyToChests()
 	local hrp = getCharacterHRP()
 	local searchedLocations = {}
 
 	while true do
-		local chests = findChests()
+		-- Search for specific chests
+		local chests = findSpecificChests()
 		if #chests > 0 then
+			-- If chests are found, go to each one
 			for _, chest in ipairs(chests) do
-				local pos = chest.PrimaryPart.Position + Vector3.new(0, 5, 0)
+				local pos = chest.PrimaryPart.Position + Vector3.new(0, 5, 0)  -- Add 5 to Y for smooth movement
 				print("✅ Flying to chest:", chest.Name)
 				tweenToPosition(hrp, pos)
 			end
-			break -- Done once all visible chests are visited
+			break -- Once all chests are visited, exit the loop
 		else
-			-- Go to the nearest unexplored location
+			-- If no chests found, go to the nearest location
 			local nextLocation = getClosestLocation(hrp)
 			if nextLocation and not searchedLocations[nextLocation] then
-				local targetPos = nextLocation.Position + Vector3.new(0, 50, 0) -- Add Y 50 here
+				local targetPos = nextLocation.Position + Vector3.new(0, 50, 0)  -- Add Y 50 to avoid collisions
 				print("🔍 No chests found, going to:", nextLocation.Name)
 				tweenToPosition(hrp, targetPos)
 				searchedLocations[nextLocation] = true
-				wait(1) -- Give time for new chests to load in (if needed)
+				wait(2)  -- Allow time for new chests to load in at the location
 			else
 				print("❌ All locations searched, no chests found.")
 				break
@@ -100,7 +109,7 @@ local function flyToChests()
 	end
 end
 
--- Auto run when player spawns
+-- Run when the player character spawns
 if player.Character then
 	task.delay(2, flyToChests)
 end
