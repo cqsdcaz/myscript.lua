@@ -3,9 +3,12 @@ local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 
 local player = Players.LocalPlayer
-local chestFolder = workspace:WaitForChild("ChestModels")
-local locations = workspace._WorldOrigin.Locations
+local hrp = player.Character:WaitForChild("HumanoidRootPart")
 
+local chestFolder = workspace:WaitForChild("ChestModels")
+
+-- Your location list
+local locations = workspace._WorldOrigin.Locations
 local locationList = {
 	locations.Colosseum,
 	locations.Desert,
@@ -21,98 +24,87 @@ local locationList = {
 	locations.Prison,
 	locations.Sea,
 	locations.Skylands,
-	locations:GetChildren()[9],  -- You can name these if needed
+	locations:GetChildren()[9],
 	locations:GetChildren()[15],
 	locations["Underwater City"],
 	locations.Whirlpool,
 }
 
--- Get HRP (HumanoidRootPart)
-local function getCharacterHRP()
-	local character = player.Character or player.CharacterAdded:Wait()
-	return character:WaitForChild("HumanoidRootPart")
-end
-
--- Function to tween the player to a target position
-local function tweenToPosition(hrp, targetPos)
-	local distance = (hrp.Position - targetPos).Magnitude
-	local speed = 200
-	local duration = distance / speed
-	if duration < 0.1 then duration = 0.1 end
-
+-- Tween to position with optional callback on the way
+local function tweenToPosition(targetPos, onStepCheck)
+	local duration = (hrp.Position - targetPos).Magnitude / 200
 	local tweenInfo = TweenInfo.new(duration, Enum.EasingStyle.Linear)
-	local goal = {CFrame = CFrame.new(targetPos)}
-	local tween = TweenService:Create(hrp, tweenInfo, goal)
+	local tween = TweenService:Create(hrp, tweenInfo, {CFrame = CFrame.new(targetPos)})
 	tween:Play()
+
+	local conn
+	conn = RunService.RenderStepped:Connect(function()
+		if onStepCheck then
+			local chest = onStepCheck()
+			if chest then
+				tween:Cancel()
+				conn:Disconnect()
+				tweenToPosition(chest.PrimaryPart.Position + Vector3.new(0, 5, 0))
+			end
+		end
+	end)
+
 	tween.Completed:Wait()
+	if conn.Connected then conn:Disconnect() end
 end
 
--- Find specific chests (Diamond, Gold, Silver)
-local function findSpecificChests()
-	local chests = {}
-	for _, obj in ipairs(chestFolder:GetChildren()) do
-		if obj:IsA("Model") and (obj.Name == "DiamondChest" or obj.Name == "GoldChest" or obj.Name == "SilverChest") then
-			if obj:FindFirstChild("PrimaryPart") then
-				table.insert(chests, obj)
-			end
+-- Get available chests
+local function findChests()
+	local results = {}
+	for _, name in ipairs({"DiamondChest", "GoldChest", "SilverChest"}) do
+		local chest = chestFolder:FindFirstChild(name)
+		if chest and chest.PrimaryPart then
+			table.insert(results, chest)
 		end
 	end
-	return chests
+	return results
 end
 
--- Get the closest location to the player
-local function getClosestLocation(hrp)
-	local closest = nil
-	local minDist = math.huge
+-- Get a random far location
+local function getFarLocation()
+	local currentPos = hrp.Position
+	local farthest = nil
+	local maxDist = -1
 	for _, loc in ipairs(locationList) do
-		if loc and loc:IsA("Part") then
-			local dist = (hrp.Position - loc.Position).Magnitude
-			if dist < minDist then
-				minDist = dist
-				closest = loc
-			end
+		local dist = (loc.Position - currentPos).Magnitude
+		if dist > maxDist then
+			maxDist = dist
+			farthest = loc
 		end
 	end
-	return closest
+	return farthest
 end
 
--- Fly to the chests or the nearest location if no chests are found
-local function flyToChests()
-	local hrp = getCharacterHRP()
-	local searchedLocations = {}
-
+-- Main loop
+task.spawn(function()
 	while true do
-		-- Search for specific chests
-		local chests = findSpecificChests()
+		local chests = findChests()
 		if #chests > 0 then
-			-- If chests are found, go to each one
 			for _, chest in ipairs(chests) do
-				local pos = chest.PrimaryPart.Position + Vector3.new(0, 5, 0)  -- Add 5 to Y for smooth movement
-				print("✅ Flying to chest:", chest.Name)
-				tweenToPosition(hrp, pos)
+				print("✅ Chest found:", chest.Name)
+				tweenToPosition(chest.PrimaryPart.Position + Vector3.new(0, 5, 0))
+				wait(1)
 			end
-			break -- Once all chests are visited, exit the loop
 		else
-			-- If no chests found, go to the nearest location
-			local nextLocation = getClosestLocation(hrp)
-			if nextLocation and not searchedLocations[nextLocation] then
-				local targetPos = nextLocation.Position + Vector3.new(0, 50, 0)  -- Add Y 50 to avoid collisions
-				print("🔍 No chests found, going to:", nextLocation.Name)
-				tweenToPosition(hrp, targetPos)
-				searchedLocations[nextLocation] = true
-				wait(2)  -- Allow time for new chests to load in at the location
-			else
-				print("❌ All locations searched, no chests found.")
-				break
-			end
-		end
-	end
-end
+			local location = getFarLocation()
+			print("📍 No chests found. Flying to location:", location.Name)
 
--- Run when the player character spawns
-if player.Character then
-	task.delay(2, flyToChests)
-end
-player.CharacterAdded:Connect(function()
-	task.delay(2, flyToChests)
+			tweenToPosition(location.Position + Vector3.new(0, 50, 0), function()
+				local c = findChests()
+				if #c > 0 then
+					print("🚨 Chest found while flying! Redirecting...")
+					return c[1]
+				end
+			end)
+
+			wait(1)
+		end
+
+		task.wait(2)
+	end
 end)
