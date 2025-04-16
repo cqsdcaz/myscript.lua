@@ -87,8 +87,9 @@ local function flyToChests()
 			-- Go to the nearest unexplored location
 			local nextLocation = getClosestLocation(hrp)
 			if nextLocation and not searchedLocations[nextLocation] then
+				local targetPos = nextLocation.Position + Vector3.new(0, 50, 0) -- Add Y 50 here
 				print("🔍 No chests found, going to:", nextLocation.Name)
-				tweenToPosition(hrp, nextLocation.Position + Vector3.new(0, 10, 0))
+				tweenToPosition(hrp, targetPos)
 				searchedLocations[nextLocation] = true
 				wait(1) -- Give time for new chests to load in (if needed)
 			else
