@@ -1,83 +1,56 @@
--- Gui to Lua
--- Paste this in your Executor and attach to a game
-
--- SERVICES
-local Players = game:GetService("Players")
-local player = Players.LocalPlayer
-
--- GUI SETUP
+-- Create GUI elements
 local ScreenGui = Instance.new("ScreenGui")
-local Frame = Instance.new("Frame")
-local TextBox = Instance.new("TextBox")
-local RunButton = Instance.new("TextButton")
-local SaveButton = Instance.new("TextButton")
-local UICorner = Instance.new("UICorner")
-
 ScreenGui.Parent = game.CoreGui
-ScreenGui.Name = "ScriptRunnerUI"
+ScreenGui.Name = "DecryptionGUI"
 
--- Frame
-Frame.Size = UDim2.new(0, 500, 0, 300)
-Frame.Position = UDim2.new(0.5, -250, 0.5, -150)
-Frame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
-Frame.BorderSizePixel = 0
+local Frame = Instance.new("Frame")
 Frame.Parent = ScreenGui
+Frame.Size = UDim2.new(0, 400, 0, 300)
+Frame.Position = UDim2.new(0.5, -200, 0.5, -150)
+Frame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+Frame.BorderSizePixel = 0
+Frame.AnchorPoint = Vector2.new(0.5, 0.5)
 
-UICorner.CornerRadius = UDim.new(0, 10)
-UICorner.Parent = Frame
-
--- TextBox
-TextBox.Size = UDim2.new(1, -20, 1, -60)
-TextBox.Position = UDim2.new(0, 10, 0, 10)
-TextBox.MultiLine = true
-TextBox.Text = "-- Paste your script here"
-TextBox.TextWrapped = true
-TextBox.ClearTextOnFocus = false
-TextBox.TextXAlignment = Enum.TextXAlignment.Left
-TextBox.TextYAlignment = Enum.TextYAlignment.Top
-TextBox.Font = Enum.Font.Code
-TextBox.TextSize = 14
-TextBox.TextColor3 = Color3.new(1, 1, 1)
-TextBox.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+local TextBox = Instance.new("TextBox")
 TextBox.Parent = Frame
+TextBox.Size = UDim2.new(1, -20, 0.7, 0)
+TextBox.Position = UDim2.new(0, 10, 0, 10)
+TextBox.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+TextBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+TextBox.TextSize = 14
+TextBox.TextWrapped = true
+TextBox.Text = "Decrypted script will appear here"
+TextBox.ClearTextOnFocus = false
 
--- Run Button
-RunButton.Size = UDim2.new(0.5, -15, 0, 40)
-RunButton.Position = UDim2.new(0, 10, 1, -45)
-RunButton.Text = "▶ Run"
-RunButton.Font = Enum.Font.SourceSansBold
-RunButton.TextSize = 18
-RunButton.BackgroundColor3 = Color3.fromRGB(60, 180, 75)
-RunButton.TextColor3 = Color3.new(1, 1, 1)
-RunButton.Parent = Frame
+local CopyButton = Instance.new("TextButton")
+CopyButton.Parent = Frame
+CopyButton.Size = UDim2.new(0, 100, 0, 40)
+CopyButton.Position = UDim2.new(0.5, -50, 0.8, 0)
+CopyButton.BackgroundColor3 = Color3.fromRGB(0, 180, 0)
+CopyButton.Text = "Copy Script"
+CopyButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+CopyButton.TextSize = 16
 
--- Save Button
-SaveButton.Size = UDim2.new(0.5, -15, 0, 40)
-SaveButton.Position = UDim2.new(0.5, 5, 1, -45)
-SaveButton.Text = "💾 Save to File"
-SaveButton.Font = Enum.Font.SourceSansBold
-SaveButton.TextSize = 18
-SaveButton.BackgroundColor3 = Color3.fromRGB(0, 130, 200)
-SaveButton.TextColor3 = Color3.new(1, 1, 1)
-SaveButton.Parent = Frame
+-- Step 1: Hook loadstring
+local original_loadstring = loadstring
+loadstring = function(source, ...)
+    print("Deobfuscated Code:\n", source)
+    TextBox.Text = source  -- Display decrypted script in the TextBox
+    return original_loadstring(source, ...)
+end
 
--- Function: Run Script
-RunButton.MouseButton1Click:Connect(function()
-    local src = TextBox.Text
-    local func, err = loadstring(src)
-    if func then
-        pcall(func)
-    else
-        warn("Error loading script:", err)
-    end
+-- Step 2: Load the obfuscated script
+local obfuscated_url = "https://raw.githubusercontent.com/Basicallyy/Basicallyy/main/Min_XT_V2_.lua"
+local obfuscated_script = game:HttpGet(obfuscated_url)
+loadstring(obfuscated_script)()  -- Run the obfuscated script
+
+-- Step 3: Define the "Copy to Clipboard" button functionality
+CopyButton.MouseButton1Click:Connect(function()
+    setclipboard(TextBox.Text)  -- Copy the decrypted script to clipboard
+    game:GetService("StarterGui"):SetCore("SendNotification", {
+        Title = "Script Copied",
+        Text = "The script has been copied to your clipboard!",
+        Duration = 2
+    })
 end)
 
--- Function: Save to File (Synapse X Only)
-SaveButton.MouseButton1Click:Connect(function()
-    if writefile then
-        writefile("DecryptedScript.lua", TextBox.Text)
-        print("✅ Script saved as 'DecryptedScript.lua'")
-    else
-        warn("❌ writefile not supported in your executor")
-    end
-end)
