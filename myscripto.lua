@@ -1,7 +1,12 @@
+local Players = game:GetService("Players")
+local UserInputService = game:GetService("UserInputService")
+local LocalPlayer = Players.LocalPlayer
+
+-- Create GUI
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "MyCustomGUI"
 ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-ScreenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+ScreenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
 
 local Frame = Instance.new("Frame")
 Frame.Parent = ScreenGui
@@ -11,7 +16,53 @@ Frame.BackgroundColor3 = Color3.fromRGB(56, 56, 56)
 Frame.BorderSizePixel = 0
 Frame.Active = true
 
--- Create a button utility function
+-- Draggable
+local function makeDraggable(frame)
+    local dragging, dragInput, dragStart, startPos
+
+    frame.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragging = true
+            dragStart = input.Position
+            startPos = frame.Position
+
+            input.Changed:Connect(function()
+                if input.UserInputState == Enum.UserInputState.End then
+                    dragging = false
+                end
+            end)
+        end
+    end)
+
+    frame.InputChanged:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseMovement then
+            dragInput = input
+        end
+    end)
+
+    UserInputService.InputChanged:Connect(function(input)
+        if input == dragInput and dragging then
+            local delta = input.Position - dragStart
+            frame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+        end
+    end)
+end
+
+makeDraggable(Frame)
+
+-- Title
+local Title = Instance.new("TextLabel")
+Title.Parent = Frame
+Title.Size = UDim2.new(0, 87, 0, 35)
+Title.Position = UDim2.new(0.0169, 0, 0.004, 0)
+Title.BackgroundColor3 = Color3.fromRGB(56, 56, 56)
+Title.BorderSizePixel = 0
+Title.Font = Enum.Font.DenkOne
+Title.Text = "My Menu"
+Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+Title.TextSize = 16
+
+-- Button Utility
 local function createButton(name, text, pos)
     local btn = Instance.new("TextButton")
     btn.Name = name
@@ -26,19 +77,6 @@ local function createButton(name, text, pos)
     btn.TextSize = 14
     return btn
 end
-
--- Title label
-local Title = Instance.new("TextLabel")
-Title.Parent = Frame
-Title.Size = UDim2.new(0, 87, 0, 35)
-Title.Position = UDim2.new(0.0169, 0, 0.004, 0)
-Title.BackgroundColor3 = Color3.fromRGB(56, 56, 56)
-Title.BorderColor3 = Color3.fromRGB(34, 34, 34)
-Title.BorderSizePixel = 0
-Title.Font = Enum.Font.DenkOne
-Title.Text = "My Menu"
-Title.TextColor3 = Color3.fromRGB(255, 255, 255)
-Title.TextSize = 16
 
 -- Close Button
 local CloseButton = createButton("Close", "X", UDim2.new(0.912, 0, 0, 0))
@@ -57,15 +95,14 @@ ScrollingFrame.BackgroundColor3 = Color3.fromRGB(56, 56, 56)
 ScrollingFrame.BorderSizePixel = 0
 ScrollingFrame.ScrollBarImageColor3 = Color3.fromRGB(0, 0, 0)
 ScrollingFrame.Visible = false
-ScrollingFrame.CanvasSize = UDim2.new(0, 0, 2, 0) -- Allow scrolling if needed
+ScrollingFrame.CanvasSize = UDim2.new(0, 0, 2, 0)
 
--- Main Farm Button
+-- Menu Buttons
 local MainFarm = createButton("MainFarm", "Main Farm", UDim2.new(0, 0, 0.140, 0))
 MainFarm.MouseButton1Click:Connect(function()
     ScrollingFrame.Visible = not ScrollingFrame.Visible
 end)
 
--- Other Buttons
 createButton("Teleport", "Teleport", UDim2.new(0, 0, 0.238, 0))
 createButton("Fruits", "Fruits", UDim2.new(0, 0, 0.336, 0))
 createButton("FarmMaterial", "Farm Material", UDim2.new(0, 0, 0.452, 0))
@@ -74,52 +111,19 @@ createButton("Esp", "Esp", UDim2.new(0, 0, 0.648, 0))
 createButton("Hop", "Hop", UDim2.new(0, 0, 0.746, 0))
 createButton("SeaEvent", "Sea Event", UDim2.new(0, 0, 0.844, 0))
 
--- Make frame draggable
-local UserInputService = game:GetService("UserInputService")
+-- Toggle Utility
+local function createCircleToggle(name, pos, parent, labelText, callback)
+    local label = Instance.new("TextLabel")
+    label.Parent = parent
+    label.Size = UDim2.new(0, 200, 0, 30)
+    label.Position = pos - UDim2.new(0, 220, 0, 0)
+    label.BackgroundTransparency = 1
+    label.Text = labelText
+    label.TextColor3 = Color3.fromRGB(255, 255, 255)
+    label.Font = Enum.Font.DenkOne
+    label.TextSize = 18
+    label.TextXAlignment = Enum.TextXAlignment.Left
 
-local function makeDraggable(frame)
-    local dragToggle = nil
-    local dragInput = nil
-    local dragStart = nil
-    local startPos = nil
-
-    local function update(input)
-        local delta = input.Position - dragStart
-        frame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X,
-                                    startPos.Y.Scale, startPos.Y.Offset + delta.Y)
-    end
-
-    frame.InputBegan:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 then
-            dragToggle = true
-            dragStart = input.Position
-            startPos = frame.Position
-
-            input.Changed:Connect(function()
-                if input.UserInputState == Enum.UserInputState.End then
-                    dragToggle = false
-                end
-            end)
-        end
-    end)
-
-    frame.InputChanged:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseMovement then
-            dragInput = input
-        end
-    end)
-
-    UserInputService.InputChanged:Connect(function(input)
-        if input == dragInput and dragToggle then
-            update(input)
-        end
-    end)
-end
-
-makeDraggable(Frame)
-
--- 🔘 Circle Toggle Function
-local function createCircleToggle(name, pos, parent, onToggle)
     local ToggleFrame = Instance.new("Frame")
     ToggleFrame.Name = name
     ToggleFrame.Size = UDim2.new(0, 60, 0, 30)
@@ -135,9 +139,7 @@ local function createCircleToggle(name, pos, parent, onToggle)
     Circle.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
     Circle.BorderSizePixel = 0
     Circle.Parent = ToggleFrame
-    Circle.AnchorPoint = Vector2.new(0, 0)
     Circle.ZIndex = 2
-    Circle.Name = "Circle"
 
     local UICornerToggle = Instance.new("UICorner")
     UICornerToggle.CornerRadius = UDim.new(1, 0)
@@ -163,8 +165,8 @@ local function createCircleToggle(name, pos, parent, onToggle)
         if input.UserInputType == Enum.UserInputType.MouseButton1 then
             isOn = not isOn
             updateVisual()
-            if onToggle then
-                onToggle(isOn)
+            if callback then
+                callback(isOn)
             end
         end
     end)
@@ -173,61 +175,33 @@ local function createCircleToggle(name, pos, parent, onToggle)
     return ToggleFrame
 end
 
--- ✅ Add Toggle & Label to Scrolling Frame
-local ToggleLabel = Instance.new("TextLabel")
-ToggleLabel.Parent = ScrollingFrame
-ToggleLabel.Size = UDim2.new(0, 200, 0, 30)
-ToggleLabel.Position = UDim2.new(0, 30, 0, 20)
-ToggleLabel.BackgroundTransparency = 1
-ToggleLabel.Text = "Auto Farm:"
-ToggleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-ToggleLabel.Font = Enum.Font.DenkOne
-ToggleLabel.TextSize = 18
-ToggleLabel.TextXAlignment = Enum.TextXAlignment.Left
+-- Toggle States
+_G.autoCheatsEnabled = false
+local autoCheatsScript = nil
 
-createCircleToggle("AutoFarmToggle", UDim2.new(0, 250, 0, 20), ScrollingFrame, function(state)
+-- Add Toggles
+createCircleToggle("AutoFarmToggle", UDim2.new(0, 250, 0, 20), ScrollingFrame, "Auto Farm:", function(state)
     print("Auto Farm:", state and "ON" or "OFF")
 end)
 
--- Add another toggle for "Auto Cheats" below your existing Auto Farm toggle
-createCircleToggle("AutoCheatsToggle", UDim2.new(0, 250, 0, 70), ScrollingFrame, function(state)
-    print("Auto Cheats:", state and "ON" or "OFF")
-end)
-
--- Add a label for the Auto Cheats toggle to differentiate it
-local AutoCheatsLabel = Instance.new("TextLabel")
-AutoCheatsLabel.Parent = ScrollingFrame
-AutoCheatsLabel.Size = UDim2.new(0, 200, 0, 30)
-AutoCheatsLabel.Position = UDim2.new(0, 30, 0, 60)  -- Adjust this to fit below Auto Farm
-AutoCheatsLabel.BackgroundTransparency = 1
-AutoCheatsLabel.Text = "Auto Cheats:"
-AutoCheatsLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-AutoCheatsLabel.Font = Enum.Font.DenkOne
-AutoCheatsLabel.TextSize = 18
-AutoCheatsLabel.TextXAlignment = Enum.TextXAlignment.Left
-
-
-
---// CreateCircleToggle Setup (You should replace this with your actual toggle)
--- local createCircleToggle = script:WaitForChild("CreateCircleToggle")  -- Replace with your actual toggle path
-
-local AutoCheatsToggle = createCircleToggle("AutoCheatsToggle", UDim2.new(0, 50, 0, 140), ScrollingFrame, function(state)
+createCircleToggle("AutoCheatsToggle", UDim2.new(0, 250, 0, 70), ScrollingFrame, "Auto Cheats:", function(state)
     print("Auto Cheats:", state and "ON" or "OFF")
     _G.autoCheatsEnabled = state
 
     if state then
-        -- If toggled ON, load the script
         if not autoCheatsScript then
-            autoCheatsScript = loadstring(game:HttpGet("https://raw.githubusercontent.com/cqsdcaz/myscript.lua/refs/heads/main/autochest.lua"))()
-            print("Auto Cheats enabled")
+            local success, result = pcall(function()
+                return loadstring(game:HttpGet("https://raw.githubusercontent.com/cqsdcaz/myscript.lua/refs/heads/main/autochest.lua"))()
+            end)
+            if success then
+                autoCheatsScript = result
+                print("Auto Cheats enabled")
+            else
+                warn("Failed to load auto cheats script:", result)
+            end
         end
     else
-        -- If toggled OFF, disable the script
-        if autoCheatsScript then
-            -- You may need to adjust this part depending on how the script operates
-            -- For now, we stop by setting the script to nil or other cleanup actions
-            autoCheatsScript = nil
-            print("Auto Cheats disabled")
-        end
+        autoCheatsScript = nil
+        print("Auto Cheats disabled")
     end
 end)
