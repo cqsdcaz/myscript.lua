@@ -179,29 +179,80 @@ end
 _G.autoCheatsEnabled = false
 local autoCheatsScript = nil
 
--- Add Toggles
-createCircleToggle("AutoFarmToggle", UDim2.new(0, 250, 0, 20), ScrollingFrame, "Auto Farm:", function(state)
-    print("Auto Farm:", state and "ON" or "OFF")
-end)
-
 createCircleToggle("AutoCheatsToggle", UDim2.new(0, 250, 0, 70), ScrollingFrame, "Auto Cheats:", function(state)
     print("Auto Cheats:", state and "ON" or "OFF")
     _G.autoCheatsEnabled = state
 
     if state then
-        if not autoCheatsScript then
-            local success, result = pcall(function()
-                return loadstring(game:HttpGet("https://raw.githubusercontent.com/cqsdcaz/myscript.lua/refs/heads/main/autochest.lua"))()
-            end)
-            if success then
-                autoCheatsScript = result
-                print("Auto Cheats enabled")
-            else
-                warn("Failed to load auto cheats script:", result)
+        -- Start script directly here
+        _G.AutoChestRunning = true
+
+        task.spawn(function()
+            local TweenService = game:GetService("TweenService")
+            local Players = game:GetService("Players")
+            local RunService = game:GetService("RunService")
+
+            local player = Players.LocalPlayer
+            local chestFolder = workspace:WaitForChild("ChestModels")
+            local locations = workspace._WorldOrigin.Locations
+
+            local locationList = {}
+
+            if game.PlaceId == 2753915549 then
+                locationList = {
+                    locations.Colosseum,
+                    locations.Desert,
+                    locations.FrozenVillage,
+                    locations.Jungle,
+                    locations.MarineBase,
+                    locations.MarineStart,
+                    locations.MiddleTown,
+                    locations.PirateStarterIsland,
+                    locations.PirateVillage,
+                    locations.SkyIsland1,
+                    locations.SkyIsland2,
+                    locations.SkyIsland3,
+                    locations.UsoppIsland
+                }
             end
-        end
+
+            local function getNearestChest()
+                local closestChest = nil
+                local shortestDistance = math.huge
+                for _, chest in pairs(chestFolder:GetChildren()) do
+                    if chest:IsA("Model") and chest:FindFirstChild("TouchInterest") then
+                        local distance = (chest.Position - player.Character.HumanoidRootPart.Position).Magnitude
+                        if distance < shortestDistance then
+                            shortestDistance = distance
+                            closestChest = chest
+                        end
+                    end
+                end
+                return closestChest
+            end
+
+            local function moveTo(position)
+                local char = player.Character
+                if not char then return end
+                local root = char:WaitForChild("HumanoidRootPart")
+                local tween = TweenService:Create(root, TweenInfo.new(1.2, Enum.EasingStyle.Linear), {CFrame = CFrame.new(position)})
+                tween:Play()
+                tween.Completed:Wait()
+            end
+
+            while _G.AutoChestRunning and task.wait(1) do
+                local chest = getNearestChest()
+                if chest then
+                    moveTo(chest.Position + Vector3.new(0, 3, 0))
+                    wait(1.2)
+                end
+            end
+        end)
+
+        print("Auto Cheats enabled")
+
     else
-        autoCheatsScript = nil
+        _G.AutoChestRunning = false
         print("Auto Cheats disabled")
     end
 end)
