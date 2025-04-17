@@ -7,7 +7,7 @@ local hrp = player.Character:WaitForChild("HumanoidRootPart")
 
 local chestFolder = workspace:WaitForChild("ChestModels")
 
--- Your location list
+-- Locations list
 local locations = workspace._WorldOrigin.Locations
 local locationList = {
 	locations.Colosseum,
@@ -30,7 +30,7 @@ local locationList = {
 	locations.Whirlpool,
 }
 
--- Tween to position with optional callback on the way
+-- Tween to target position with optional mid-flight chest check
 local function tweenToPosition(targetPos, onStepCheck)
 	local duration = (hrp.Position - targetPos).Magnitude / 200
 	local tweenInfo = TweenInfo.new(duration, Enum.EasingStyle.Linear)
@@ -50,34 +50,46 @@ local function tweenToPosition(targetPos, onStepCheck)
 	end)
 
 	tween.Completed:Wait()
-	if conn.Connected then conn:Disconnect() end
+	if conn and conn.Connected then
+		conn:Disconnect()
+	end
 end
 
--- Get available chests
+-- Find all chests
 local function findChests()
 	local results = {}
 	for _, name in ipairs({"DiamondChest", "GoldChest", "SilverChest"}) do
 		local chest = chestFolder:FindFirstChild(name)
-		if chest and chest.PrimaryPart then
+		if chest and chest:IsA("Model") and chest.PrimaryPart then
 			table.insert(results, chest)
 		end
 	end
 	return results
 end
 
--- Get a random far location
-local function getFarLocation()
+-- Get second closest location to player
+local function getSecondClosestLocation()
 	local currentPos = hrp.Position
-	local farthest = nil
-	local maxDist = -1
+	local distances = {}
+
 	for _, loc in ipairs(locationList) do
-		local dist = (loc.Position - currentPos).Magnitude
-		if dist > maxDist then
-			maxDist = dist
-			farthest = loc
+		if loc and loc:IsA("BasePart") then
+			local dist = (loc.Position - currentPos).Magnitude
+			table.insert(distances, {location = loc, distance = dist})
 		end
 	end
-	return farthest
+
+	table.sort(distances, function(a, b)
+		return a.distance < b.distance
+	end)
+
+	if #distances >= 2 then
+		return distances[2].location
+	elseif #distances >= 1 then
+		return distances[1].location
+	else
+		return nil
+	end
 end
 
 -- Main loop
@@ -86,25 +98,27 @@ task.spawn(function()
 		local chests = findChests()
 		if #chests > 0 then
 			for _, chest in ipairs(chests) do
-				print("✅ Chest found:", chest.Name)
+				print("✅ Found chest:", chest.Name)
 				tweenToPosition(chest.PrimaryPart.Position + Vector3.new(0, 5, 0))
 				wait(1)
 			end
 		else
-			local location = getFarLocation()
-			print("📍 No chests found. Flying to location:", location.Name)
-
-			tweenToPosition(location.Position + Vector3.new(0, 50, 0), function()
-				local c = findChests()
-				if #c > 0 then
-					print("🚨 Chest found while flying! Redirecting...")
-					return c[1]
-				end
-			end)
-
-			wait(1)
+			local location = getSecondClosestLocation()
+			if location then
+				local targetPos = location.Position + Vector3.new(0, 50, 0)
+				print("📍 No chests. Flying to:", location.Name)
+				tweenToPosition(targetPos, function()
+					local c = findChests()
+					if #c > 0 then
+						print("🚨 Chest found mid-flight!")
+						return c[1]
+					end
+				end)
+			else
+				warn("❌ No valid locations to fly to.")
+			end
 		end
 
-		task.wait(2)
+		wait(2)
 	end
 end)
