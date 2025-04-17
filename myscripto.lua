@@ -206,29 +206,4 @@ createCircleToggle("AutoCheatsToggle", UDim2.new(0, 250, 0, 70), ScrollingFrame,
     end
 end)
 
--- Stop Traveling Button
-local StopTravelBtn = Instance.new("TextButton")
-StopTravelBtn.Parent = ScrollingFrame
-StopTravelBtn.Size = UDim2.new(0, 160, 0, 30)
-StopTravelBtn.Position = UDim2.new(0, 250, 0, 120)
-StopTravelBtn.BackgroundColor3 = Color3.fromRGB(150, 50, 50)
-StopTravelBtn.Text = "Stop Traveling"
-StopTravelBtn.TextColor3 = Color3.new(1, 1, 1)
-StopTravelBtn.Font = Enum.Font.DenkOne
-StopTravelBtn.TextSize = 16
-StopTravelBtn.BorderSizePixel = 0
-
-StopTravelBtn.MouseButton1Click:Connect(function()
-    print("Stopping travel...")
-
-    -- Option 1: If your autochest script uses a global variable to control travel
-    _G.stopTravel = true
-
-    -- Option 2: If your script returns a function or table with a stop() method
-    if autoCheatsScript and typeof(autoCheatsScript) == "function" then
-        autoCheatsScript("stop")
-    elseif autoCheatsScript and type(autoCheatsScript.stop) == "function" then
-        autoCheatsScript.stop()
-    end
-end)
 
