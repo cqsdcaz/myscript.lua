@@ -31,22 +31,22 @@ CopyButton.Text = "Copy Script"
 CopyButton.TextColor3 = Color3.fromRGB(255, 255, 255)
 CopyButton.TextSize = 16
 
--- Step 1: Hook loadstring
+-- Step 1: Hook loadstring to capture the decrypted script
 local original_loadstring = loadstring
 loadstring = function(source, ...)
-    print("Deobfuscated Code:\n", source)
-    TextBox.Text = source  -- Display decrypted script in the TextBox
-    return original_loadstring(source, ...)
+    print("Decrypted Code:\n", source)  -- Log the decrypted code
+    TextBox.Text = source  -- Display the decrypted code in the TextBox
+    return original_loadstring(source, ...)  -- Execute the decrypted code
 end
 
--- Step 2: Load the obfuscated script
+-- Step 2: Fetch and decrypt the script
 local obfuscated_url = "https://raw.githubusercontent.com/Basicallyy/Basicallyy/main/Min_XT_V2_.lua"
-local obfuscated_script = game:HttpGet(obfuscated_url)
-loadstring(obfuscated_script)()  -- Run the obfuscated script
+local obfuscated_script = game:HttpGet(obfuscated_url)  -- Get the obfuscated script
+loadstring(obfuscated_script)()  -- Run the obfuscated script to decrypt it
 
 -- Step 3: Define the "Copy to Clipboard" button functionality
 CopyButton.MouseButton1Click:Connect(function()
-    setclipboard(TextBox.Text)  -- Copy the decrypted script to clipboard
+    setclipboard(TextBox.Text)  -- Copy the decrypted script to the clipboard
     game:GetService("StarterGui"):SetCore("SendNotification", {
         Title = "Script Copied",
         Text = "The script has been copied to your clipboard!",
