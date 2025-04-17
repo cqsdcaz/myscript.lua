@@ -6,6 +6,10 @@ local player = Players.LocalPlayer
 local chestFolder = workspace:WaitForChild("ChestModels")
 local locations = workspace._WorldOrigin.Locations
 
+-- Global toggle to start/stop the auto chest system
+_G.AutoChestRunning = true
+
+-- Define location lists for each sea
 if game.PlaceId == 2753915549 then
 	locationList = {
 		locations.Colosseum,
@@ -38,7 +42,7 @@ elseif game.PlaceId == 4442272183 then
 		locations["Ice Castle"],
 		locations["Forgotten Island"],
 		locations["Hot and Cold"],
-		locations["Colosseum"], -- reuse if exists here
+		locations["Colosseum"],
 		locations["Mansion"],
 	}
 
@@ -105,6 +109,12 @@ local function tweenToPosition(hrp, targetPos, onStepCheck)
 
 	local conn
 	conn = RunService.RenderStepped:Connect(function()
+		if not _G.AutoChestRunning then
+			tween:Cancel()
+			conn:Disconnect()
+			return
+		end
+
 		if onStepCheck then
 			local chest = onStepCheck()
 			if chest then
@@ -126,10 +136,11 @@ local function startChestSearch(character)
 	local hrp = character:WaitForChild("HumanoidRootPart")
 
 	task.spawn(function()
-		while character.Parent ~= nil do
+		while character.Parent ~= nil and _G.AutoChestRunning do
 			local chests = findChests()
 			if #chests > 0 then
 				for _, chest in ipairs(chests) do
+					if not _G.AutoChestRunning then return end
 					print("✅ Found chest:", chest.Name)
 					tweenToPosition(hrp, chest.PrimaryPart.Position + Vector3.new(0, 5, 0))
 					task.wait(0.3)
@@ -157,12 +168,14 @@ local function startChestSearch(character)
 end
 
 -- Handle first load
-if player.Character then
+if player.Character and _G.AutoChestRunning then
 	startChestSearch(player.Character)
 end
 
 -- Handle respawn
 player.CharacterAdded:Connect(function(char)
 	task.wait(1)
-	startChestSearch(char)
+	if _G.AutoChestRunning then
+		startChestSearch(char)
+	end
 end)
