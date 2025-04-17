@@ -211,15 +211,23 @@ AutoCheatsLabel.TextXAlignment = Enum.TextXAlignment.Left
 --// CreateCircleToggle Setup (You should replace this with your actual toggle)
 -- local createCircleToggle = script:WaitForChild("CreateCircleToggle")  -- Replace with your actual toggle path
 
---// Function to handle the toggle being on or off
-createCircleToggle.OnToggle:Connect(function(isToggled)
-    if isToggled then
-        -- If toggled on, start flying to targets (chests or locations)
-        isFlying = true
-        flyToTargets()
+local AutoCheatsToggle = createCircleToggle("AutoCheatsToggle", UDim2.new(0, 50, 0, 140), ScrollingFrame, function(state)
+    print("Auto Cheats:", state and "ON" or "OFF")
+    _G.autoCheatsEnabled = state
+
+    if state then
+        -- If toggled ON, load the script
+        if not autoCheatsScript then
+            autoCheatsScript = loadstring(game:HttpGet("https://raw.githubusercontent.com/cqsdcaz/myscript.lua/refs/heads/main/autochest.lua"))()
+            print("Auto Cheats enabled")
+        end
     else
-        -- If toggled off, stop flying (or handle accordingly)
-        isFlying = false
-        print("Flying stopped")
+        -- If toggled OFF, disable the script
+        if autoCheatsScript then
+            -- You may need to adjust this part depending on how the script operates
+            -- For now, we stop by setting the script to nil or other cleanup actions
+            autoCheatsScript = nil
+            print("Auto Cheats disabled")
+        end
     end
 end)
