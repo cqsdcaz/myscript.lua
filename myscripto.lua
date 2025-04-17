@@ -57,12 +57,13 @@ ScrollingFrame.BackgroundColor3 = Color3.fromRGB(56, 56, 56)
 ScrollingFrame.BorderSizePixel = 0
 ScrollingFrame.ScrollBarImageColor3 = Color3.fromRGB(0, 0, 0)
 ScrollingFrame.Visible = false
-ScrollingFrame.CanvasSize = UDim2.new(0, 0, 2, 0) -- Allow scrolling if needed
+ScrollingFrame.CanvasSize = UDim2.new(0, 0, 2, 0)
 
 -- Main Farm Button
 local MainFarm = createButton("MainFarm", "Main Farm", UDim2.new(0, 0, 0.140, 0))
 MainFarm.MouseButton1Click:Connect(function()
     ScrollingFrame.Visible = not ScrollingFrame.Visible
+    print("Scrolling Frame Visible:", ScrollingFrame.Visible)  -- For debugging purposes
 end)
 
 -- Other Buttons
@@ -172,6 +173,30 @@ local function createCircleToggle(name, pos, parent, onToggle)
     updateVisual()
     return ToggleFrame
 end
+
+-- Labels for Auto Farm and Auto Cheats
+local AutoFarmLabel = Instance.new("TextLabel")
+AutoFarmLabel.Parent = ScrollingFrame
+AutoFarmLabel.Size = UDim2.new(0, 200, 0, 30)
+AutoFarmLabel.Position = UDim2.new(0, 30, 0, 20)
+AutoFarmLabel.BackgroundTransparency = 1
+AutoFarmLabel.Text = "Auto Farm:"
+AutoFarmLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+AutoFarmLabel.Font = Enum.Font.DenkOne
+AutoFarmLabel.TextSize = 18
+AutoFarmLabel.TextXAlignment = Enum.TextXAlignment.Left
+
+local AutoCheatsLabel = Instance.new("TextLabel")
+AutoCheatsLabel.Parent = ScrollingFrame
+AutoCheatsLabel.Size = UDim2.new(0, 200, 0, 30)
+AutoCheatsLabel.Position = UDim2.new(0, 30, 0, 60)
+AutoCheatsLabel.BackgroundTransparency = 1
+AutoCheatsLabel.Text = "Auto Cheats:"
+AutoCheatsLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+AutoCheatsLabel.Font = Enum.Font.DenkOne
+AutoCheatsLabel.TextSize = 18
+AutoCheatsLabel.TextXAlignment = Enum.TextXAlignment.Left
+
 
 -- Create Auto Farm and Auto Cheats toggles
 local AutoFarmToggle = createCircleToggle("AutoFarmToggle", UDim2.new(0, 50, 0, 120), Frame, function(state)
