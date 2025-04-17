@@ -39,8 +39,8 @@ local function findChests()
 	return results
 end
 
--- Get second closest location
-local function getSecondClosestLocation(hrp)
+-- Get random location that's not the farthest
+local function getRandomNearbyLocation(hrp)
 	local currentPos = hrp.Position
 	local distances = {}
 
@@ -55,16 +55,18 @@ local function getSecondClosestLocation(hrp)
 		return a.distance < b.distance
 	end)
 
-	if #distances >= 2 then
-		return distances[2].location
-	elseif #distances >= 1 then
+	if #distances <= 2 then
 		return distances[1].location
 	else
-		return nil
+		local trimmed = {}
+		for i = 1, #distances - 1 do
+			table.insert(trimmed, distances[i].location)
+		end
+		return trimmed[math.random(1, #trimmed)]
 	end
 end
 
--- Tween with mid-check for chests
+-- Tween with mid-flight chest check
 local function tweenToPosition(hrp, targetPos, onStepCheck)
 	local duration = (hrp.Position - targetPos).Magnitude / 200
 	local tweenInfo = TweenInfo.new(duration, Enum.EasingStyle.Linear)
@@ -89,7 +91,7 @@ local function tweenToPosition(hrp, targetPos, onStepCheck)
 	end
 end
 
--- Main chest-searching loop
+-- Main search loop
 local function startChestSearch(character)
 	local hrp = character:WaitForChild("HumanoidRootPart")
 
@@ -103,10 +105,10 @@ local function startChestSearch(character)
 					task.wait(1)
 				end
 			else
-				local location = getSecondClosestLocation(hrp)
-				if location then
-					local targetPos = location.Position + Vector3.new(0, 50, 0)
-					print("📍 No chests. Flying to:", location.Name)
+				local randomLoc = getRandomNearbyLocation(hrp)
+				if randomLoc then
+					local targetPos = randomLoc.Position + Vector3.new(0, 50, 0)
+					print("📍 No chests. Flying to:", randomLoc.Name)
 					tweenToPosition(hrp, targetPos, function()
 						local c = findChests()
 						if #c > 0 then
@@ -124,13 +126,13 @@ local function startChestSearch(character)
 	end)
 end
 
--- On first load
+-- Handle first load
 if player.Character then
 	startChestSearch(player.Character)
 end
 
--- On respawn
-player.CharacterAdded:Connect(function(character)
+-- Handle respawn
+player.CharacterAdded:Connect(function(char)
 	task.wait(1)
-	startChestSearch(character)
+	startChestSearch(char)
 end)
