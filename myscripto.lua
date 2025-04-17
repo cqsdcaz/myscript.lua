@@ -57,13 +57,12 @@ ScrollingFrame.BackgroundColor3 = Color3.fromRGB(56, 56, 56)
 ScrollingFrame.BorderSizePixel = 0
 ScrollingFrame.ScrollBarImageColor3 = Color3.fromRGB(0, 0, 0)
 ScrollingFrame.Visible = false
-ScrollingFrame.CanvasSize = UDim2.new(0, 0, 2, 0)
+ScrollingFrame.CanvasSize = UDim2.new(0, 0, 2, 0) -- Allow scrolling if needed
 
 -- Main Farm Button
 local MainFarm = createButton("MainFarm", "Main Farm", UDim2.new(0, 0, 0.140, 0))
 MainFarm.MouseButton1Click:Connect(function()
     ScrollingFrame.Visible = not ScrollingFrame.Visible
-    print("Scrolling Frame Visible:", ScrollingFrame.Visible)  -- For debugging purposes
 end)
 
 -- Other Buttons
@@ -174,22 +173,32 @@ local function createCircleToggle(name, pos, parent, onToggle)
     return ToggleFrame
 end
 
--- Labels for Auto Farm and Auto Cheats
-local AutoFarmLabel = Instance.new("TextLabel")
-AutoFarmLabel.Parent = ScrollingFrame
-AutoFarmLabel.Size = UDim2.new(0, 200, 0, 30)
-AutoFarmLabel.Position = UDim2.new(0, 30, 0, 20)
-AutoFarmLabel.BackgroundTransparency = 1
-AutoFarmLabel.Text = "Auto Farm:"
-AutoFarmLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-AutoFarmLabel.Font = Enum.Font.DenkOne
-AutoFarmLabel.TextSize = 18
-AutoFarmLabel.TextXAlignment = Enum.TextXAlignment.Left
+-- ✅ Add Toggle & Label to Scrolling Frame
+local ToggleLabel = Instance.new("TextLabel")
+ToggleLabel.Parent = ScrollingFrame
+ToggleLabel.Size = UDim2.new(0, 200, 0, 30)
+ToggleLabel.Position = UDim2.new(0, 30, 0, 20)
+ToggleLabel.BackgroundTransparency = 1
+ToggleLabel.Text = "Auto Farm:"
+ToggleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+ToggleLabel.Font = Enum.Font.DenkOne
+ToggleLabel.TextSize = 18
+ToggleLabel.TextXAlignment = Enum.TextXAlignment.Left
 
+createCircleToggle("AutoFarmToggle", UDim2.new(0, 250, 0, 20), ScrollingFrame, function(state)
+    print("Auto Farm:", state and "ON" or "OFF")
+end)
+
+-- Add another toggle for "Auto Cheats" below your existing Auto Farm toggle
+createCircleToggle("AutoCheatsToggle", UDim2.new(0, 250, 0, 70), ScrollingFrame, function(state)
+    print("Auto Cheats:", state and "ON" or "OFF")
+end)
+
+-- Add a label for the Auto Cheats toggle to differentiate it
 local AutoCheatsLabel = Instance.new("TextLabel")
 AutoCheatsLabel.Parent = ScrollingFrame
 AutoCheatsLabel.Size = UDim2.new(0, 200, 0, 30)
-AutoCheatsLabel.Position = UDim2.new(0, 30, 0, 60)
+AutoCheatsLabel.Position = UDim2.new(0, 30, 0, 60)  -- Adjust this to fit below Auto Farm
 AutoCheatsLabel.BackgroundTransparency = 1
 AutoCheatsLabel.Text = "Auto Cheats:"
 AutoCheatsLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -198,17 +207,19 @@ AutoCheatsLabel.TextSize = 18
 AutoCheatsLabel.TextXAlignment = Enum.TextXAlignment.Left
 
 
--- Create Auto Farm and Auto Cheats toggles
-local AutoFarmToggle = createCircleToggle("AutoFarmToggle", UDim2.new(0, 50, 0, 120), Frame, function(state)
-    print("Auto Farm:", state and "ON" or "OFF")
-    -- Your Auto Farm logic here
-end)
 
-local AutoCheatsToggle = createCircleToggle("AutoCheatsToggle", UDim2.new(0, 50, 0, 160), Frame, function(state)
-    print("Auto Cheats:", state and "ON" or "OFF")
-    -- Your Auto Cheats logic here
-    _G.autoCheatsEnabled = state
-    -- Load external script for auto chest
-    loadstring(game:HttpGet("https://raw.githubusercontent.com/cqsdcaz/myscript.lua/refs/heads/main/autochest.lua"))()
-end)
+--// CreateCircleToggle Setup (You should replace this with your actual toggle)
+-- local createCircleToggle = script:WaitForChild("CreateCircleToggle")  -- Replace with your actual toggle path
 
+--// Function to handle the toggle being on or off
+createCircleToggle.OnToggle:Connect(function(isToggled)
+    if isToggled then
+        -- If toggled on, start flying to targets (chests or locations)
+        isFlying = true
+        flyToTargets()
+    else
+        -- If toggled off, stop flying (or handle accordingly)
+        isFlying = false
+        print("Flying stopped")
+    end
+end)
