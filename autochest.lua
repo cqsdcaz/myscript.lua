@@ -6,26 +6,56 @@ local player = Players.LocalPlayer
 local chestFolder = workspace:WaitForChild("ChestModels")
 local locations = workspace._WorldOrigin.Locations
 
-local locationList = {
-	locations.Colosseum,
-	locations.Desert,
-	locations["Fountain City"],
-	locations["Frozen Village"],
-	locations.Jungle,
-	locations["Magma Village"],
-	locations["Marine Fortress"],
-	locations["Marine Starter"],
-	locations["Middle Town"],
-	locations["Pirate Starter"],
-	locations["Pirate Village"],
-	locations.Prison,
-	locations.Sea,
-	locations.Skylands,
-	locations:GetChildren()[9],
-	locations:GetChildren()[15],
-	locations["Underwater City"],
-	locations.Whirlpool,
-}
+if game.PlaceId == 2753915549 then
+	locationList = {
+		locations.Colosseum,
+		locations.Desert,
+		locations["Fountain City"],
+		locations["Frozen Village"],
+		locations.Jungle,
+		locations["Magma Village"],
+		locations["Marine Fortress"],
+		locations["Marine Starter"],
+		locations["Middle Town"],
+		locations["Pirate Starter"],
+		locations["Pirate Village"],
+		locations.Prison,
+		locations.Sea,
+		locations.Skylands,
+		locations:GetChildren()[9],
+		locations:GetChildren()[15],
+		locations["Underwater City"],
+		locations.Whirlpool,
+	}
+
+elseif game.PlaceId == 4442272183 then
+	locationList = {
+		locations["Kingdom of Rose"],
+		locations["Green Zone"],
+		locations["Dark Arena"],
+		locations["Usoap's Island"],
+		locations["Cursed Ship"],
+		locations["Ice Castle"],
+		locations["Forgotten Island"],
+		locations["Hot and Cold"],
+		locations["Colosseum"], -- reuse if exists here
+		locations["Mansion"],
+	}
+
+elseif game.PlaceId == 7449423635 then
+	locationList = {
+		locations["Port Town"],
+		locations["Great Tree"],
+		locations["Floating Turtle"],
+		locations["Hydra Island"],
+		locations["Castle on the Sea"],
+		locations["Haunted Castle"],
+		locations["Sea of Treats"],
+	}
+
+else
+	warn("This PlaceId is not recognized: " .. game.PlaceId)
+end
 
 -- Chest finder
 local function findChests()
