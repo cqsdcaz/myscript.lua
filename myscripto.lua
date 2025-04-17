@@ -1,6 +1,9 @@
 local Players = game:GetService("Players")
 local UserInputService = game:GetService("UserInputService")
 local LocalPlayer = Players.LocalPlayer
+local TweenService = game:GetService("TweenService")
+local RunService = game:GetService("RunService")
+local workspace = game:GetService("Workspace")
 
 -- Create GUI
 local ScreenGui = Instance.new("ScreenGui")
@@ -188,11 +191,6 @@ createCircleToggle("AutoCheatsToggle", UDim2.new(0, 250, 0, 70), ScrollingFrame,
         _G.AutoChestRunning = true
 
         task.spawn(function()
-            local TweenService = game:GetService("TweenService")
-            local Players = game:GetService("Players")
-            local RunService = game:GetService("RunService")
-
-            local player = Players.LocalPlayer
             local chestFolder = workspace:WaitForChild("ChestModels")
             local locations = workspace._WorldOrigin.Locations
 
@@ -221,10 +219,13 @@ createCircleToggle("AutoCheatsToggle", UDim2.new(0, 250, 0, 70), ScrollingFrame,
                 local shortestDistance = math.huge
                 for _, chest in pairs(chestFolder:GetChildren()) do
                     if chest:IsA("Model") and chest:FindFirstChild("TouchInterest") then
-                        local distance = (chest.Position - player.Character.HumanoidRootPart.Position).Magnitude
-                        if distance < shortestDistance then
-                            shortestDistance = distance
-                            closestChest = chest
+                        local primary = chest.PrimaryPart or chest:FindFirstChild("Main") or chest:FindFirstChildWhichIsA("BasePart")
+                        if primary then
+                            local distance = (primary.Position - LocalPlayer.Character.HumanoidRootPart.Position).Magnitude
+                            if distance < shortestDistance then
+                                shortestDistance = distance
+                                closestChest = primary
+                            end
                         end
                     end
                 end
@@ -232,9 +233,9 @@ createCircleToggle("AutoCheatsToggle", UDim2.new(0, 250, 0, 70), ScrollingFrame,
             end
 
             local function moveTo(position)
-                local char = player.Character
-                if not char then return end
-                local root = char:WaitForChild("HumanoidRootPart")
+                local char = LocalPlayer.Character
+                if not char or not char:FindFirstChild("HumanoidRootPart") then return end
+                local root = char.HumanoidRootPart
                 local tween = TweenService:Create(root, TweenInfo.new(1.2, Enum.EasingStyle.Linear), {CFrame = CFrame.new(position)})
                 tween:Play()
                 tween.Completed:Wait()
@@ -248,13 +249,8 @@ createCircleToggle("AutoCheatsToggle", UDim2.new(0, 250, 0, 70), ScrollingFrame,
                 end
             end
         end)
-
-        print("Auto Cheats enabled")
-
     else
+        -- Stop the chest auto interaction
         _G.AutoChestRunning = false
-        print("Auto Cheats disabled")
     end
 end)
-
-
