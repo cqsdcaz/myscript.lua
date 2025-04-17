@@ -102,7 +102,7 @@ local function startChestSearch(character)
 				for _, chest in ipairs(chests) do
 					print("✅ Found chest:", chest.Name)
 					tweenToPosition(hrp, chest.PrimaryPart.Position + Vector3.new(0, 5, 0))
-					task.wait(1)
+					task.wait(0.3)
 				end
 			else
 				local randomLoc = getRandomNearbyLocation(hrp)
