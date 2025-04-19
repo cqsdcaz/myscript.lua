@@ -1,4 +1,4 @@
-task.wait(30) -- Wait 30 seconds before the script starts
+task.wait(15) -- Wait 30 seconds before the script starts
 
 local player = game.Players.LocalPlayer
 local TweenService = game:GetService("TweenService")
