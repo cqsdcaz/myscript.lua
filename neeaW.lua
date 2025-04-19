@@ -1,6 +1,10 @@
 local player = game.Players.LocalPlayer
 local TweenService = game:GetService("TweenService")
 local TeleportService = game:GetService("TeleportService")
+local HttpService = game:GetService("HttpService")
+
+-- Discord Webhook URL (update with your own webhook)
+local webhookURL = "https://discord.com/api/webhooks/1363192645488218122/-4Rbq5Bc-C_6qXNzc1uiAd6lUfS72GaddrlNTkw_mmcxR2UdCj4BcjYMBlCyweF4IrKA"
 
 local mythicalFruits = {
 	["Gravity Fruit"] = true, ["Mammoth Fruit"] = true, ["T-Rex Fruit"] = true,
@@ -19,6 +23,7 @@ local fruitNames = {
 	"Dragon Fruit", "Leopard Fruit", "Kitsune Fruit"
 }
 
+-- Function to check if the fruit is one of the listed fruits
 local function isFruit(name)
 	for _, fruit in ipairs(fruitNames) do
 		if name == fruit then return true end
@@ -26,6 +31,27 @@ local function isFruit(name)
 	return false
 end
 
+-- Function to send a message to Discord webhook
+local function sendToDiscord(fruitName, serverId, seaInfo)
+	local data = {
+		content = "Mythical Fruit Found: **" .. fruitName .. "**\nServer ID: " .. serverId .. "\nSea: " .. seaInfo
+	}
+
+	local jsonData = HttpService:JSONEncode(data)
+
+	-- Send HTTP POST request to Discord webhook
+	local success, response = pcall(function()
+		return HttpService:PostAsync(webhookURL, jsonData, Enum.HttpContentType.ApplicationJson)
+	end)
+
+	if not success then
+		warn("Failed to send webhook: " .. response)
+	else
+		print("Successfully sent webhook for " .. fruitName)
+	end
+end
+
+-- Function to play a sound (for effect when fruit is found)
 local function playSound(id, volume)
 	local sound = Instance.new("Sound", workspace)
 	sound.SoundId = id
@@ -34,6 +60,7 @@ local function playSound(id, volume)
 	game:GetService("Debris"):AddItem(sound, 3)
 end
 
+-- Function to create ESP for a fruit
 local function createESP(part, name)
 	if not part then return end
 	local billboard = Instance.new("BillboardGui", part)
@@ -50,6 +77,7 @@ local function createESP(part, name)
 	text.Text = name
 end
 
+-- Function to fly to the fruit
 local function flyToFruit(fruit)
 	local handle = fruit:FindFirstChild("Handle")
 	if not handle then return end
@@ -76,6 +104,7 @@ local function flyToFruit(fruit)
 	end
 end
 
+-- Function to hop servers if no fruits are found
 local function hopServer()
 	local PlaceID = game.PlaceId
 	local servers = game:GetService("HttpService"):JSONDecode(game:HttpGet("https://games.roblox.com/v1/games/"..PlaceID.."/servers/Public?sortOrder=Asc&limit=100")).data
@@ -87,6 +116,7 @@ local function hopServer()
 	end
 end
 
+-- Function to scan for fruits and fly to them
 local function scanAndFly()
 	while true do
 		local fruits = {}
@@ -97,6 +127,8 @@ local function scanAndFly()
 				table.insert(fruits, obj)
 				if mythicalFruits[obj.Name] then
 					hasMythical = true
+					-- Send message to Discord webhook for mythical fruit
+					sendToDiscord(obj.Name, game.JobId, "First Sea")  -- Change "First Sea" to the actual sea info as required
 				end
 			end
 		end
