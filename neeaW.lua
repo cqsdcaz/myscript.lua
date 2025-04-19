@@ -1,6 +1,9 @@
 local player = game.Players.LocalPlayer
 local TweenService = game:GetService("TweenService")
 local TeleportService = game:GetService("TeleportService")
+local GuiService = game:GetService("GuiService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local UserInputService = game:GetService("UserInputService")
 
 local fruits = {
     "Rocket Fruit", "Spin Fruit", "Chop Fruit", "Spring Fruit", "Bomb Fruit", "Smoke Fruit",
@@ -12,6 +15,16 @@ local fruits = {
     "Dragon Fruit", "Leopard Fruit", "Kitsune Fruit"
 }
 
+-- Function to check if the fruit is in the player's backpack
+local function hasFruitInBackpack()
+    for _, item in pairs(player.Backpack:GetChildren()) do
+        if isFruit(item.Name) then
+            return true
+        end
+    end
+    return false
+end
+
 -- Function to check if the fruit is in the fruits list
 local function isFruit(name)
     for _, fruit in ipairs(fruits) do
@@ -20,61 +33,33 @@ local function isFruit(name)
     return false
 end
 
--- Function to play a sound (for effect when fruit is found)
-local function playSound(id, volume)
-    local sound = Instance.new("Sound", workspace)
-    sound.SoundId = id
-    sound.Volume = volume
-    sound:Play()
-    game:GetService("Debris"):AddItem(sound, 3)
-end
-
--- Function to create ESP for a fruit
-local function createESP(part, name)
-    if not part then return end
-    local billboard = Instance.new("BillboardGui", part)
-    billboard.Size = UDim2.new(0, 100, 0, 20)
-    billboard.AlwaysOnTop = true
-    billboard.StudsOffset = Vector3.new(0, 2, 0)
-
-    local text = Instance.new("TextLabel", billboard)
-    text.Size = UDim2.new(1, 0, 1, 0)
-    text.BackgroundTransparency = 1
-    text.TextColor3 = Color3.new(1, 1, 0)
-    text.Font = Enum.Font.GothamBold
-    text.TextSize = 14
-    text.Text = name
-end
-
--- Function to fly to the fruit
+-- Function to fly to a fruit
 local function flyToFruit(fruit)
     local handle = fruit:FindFirstChild("Handle")
     if not handle then return end
-    playSound("rbxassetid://3997124966", 4)
 
-    while fruit:IsDescendantOf(workspace) do
-        local char = player.Character
-        if char and char:FindFirstChild("HumanoidRootPart") then
-            local hrp = char.HumanoidRootPart
-            local dist = (handle.Position - hrp.Position).Magnitude
-            local duration = dist / 200
-            local tween = TweenService:Create(hrp, TweenInfo.new(duration, Enum.EasingStyle.Linear), {
-                CFrame = CFrame.new(handle.Position + Vector3.new(0, 5, 0))
-            })
-            tween:Play()
-            tween.Completed:Wait()
-            break
-        end
-        task.wait(0.2)
-    end
-
-    if not fruit:IsDescendantOf(workspace) then
-        playSound("rbxassetid://4612375233", 1)
+    -- Create a simple flying animation to move towards the fruit
+    local character = player.Character
+    if character and character:FindFirstChild("HumanoidRootPart") then
+        local hrp = character.HumanoidRootPart
+        local distance = (handle.Position - hrp.Position).Magnitude
+        local duration = distance / 100  -- Adjust speed of flight
+        local tweenInfo = TweenInfo.new(duration, Enum.EasingStyle.Linear)
+        
+        local goal = {CFrame = CFrame.new(handle.Position + Vector3.new(0, 5, 0))}
+        local tween = TweenService:Create(hrp, tweenInfo, goal)
+        tween:Play()
+        tween.Completed:Wait()
     end
 end
 
--- Function to hop servers if no fruits are found
+-- Function to hop servers if no fruits are found and the player doesn't have one in their backpack
 local function hopServer()
+    if hasFruitInBackpack() then
+        print("Player already has a fruit, skipping server hop.")
+        return
+    end
+    
     local PlaceID = game.PlaceId
     local minPlayers = 8  -- Minimum number of players you want in a server
     local maxPlayers = 12  -- Maximum number of players for the server to be considered
@@ -90,14 +75,25 @@ local function hopServer()
     end
 end
 
-
--- Function to scan for fruits and fly to them
-local function scanAndFly()
-    while true do
+-- Function to create a GUI button to trigger server hop
+local function createHopButton()
+    -- Create a simple GUI button
+    local screenGui = Instance.new("ScreenGui", player.PlayerGui)
+    local hopButton = Instance.new("TextButton", screenGui)
+    hopButton.Size = UDim2.new(0, 200, 0, 50)
+    hopButton.Position = UDim2.new(0.5, -100, 0.5, -25)
+    hopButton.Text = "Hop Server"
+    hopButton.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
+    hopButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    hopButton.Font = Enum.Font.Gotham
+    hopButton.TextSize = 24
+    
+    -- Connect button click event to server hop
+    hopButton.MouseButton1Click:Connect(function()
+        -- If the player has a fruit in their backpack, skip hopping and fly to the fruit
         local fruitsFound = {}
-
         for _, obj in pairs(workspace:GetChildren()) do
-            if isFruit(obj.Name) or obj:IsA("Model") and obj.Name == "Fruit" then
+            if isFruit(obj.Name) then
                 table.insert(fruitsFound, obj)
             end
         end
@@ -105,19 +101,15 @@ local function scanAndFly()
         if #fruitsFound > 0 then
             for _, fruit in ipairs(fruitsFound) do
                 if fruit and fruit:IsDescendantOf(workspace) then
-                    createESP(fruit:FindFirstChild("Handle"), fruit.Name)
                     flyToFruit(fruit)
-                    task.wait(0.5)
+                    break
                 end
             end
         else
-            task.wait(3)
-            hopServer()  -- Hop server if no fruits found
+            hopServer()  -- Trigger server hop if no fruits found
         end
-
-        task.wait(2)
-    end
+    end)
 end
 
--- 🚀 Start auto scan and fly
-task.spawn(scanAndFly)
+-- Create the button when the script starts
+createHopButton()
