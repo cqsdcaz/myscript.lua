@@ -85,7 +85,6 @@ local function hopServer()
     end
 end
 
-
 -- Function to scan for fruits and fly to them
 local function scanAndFly()
     while true do
