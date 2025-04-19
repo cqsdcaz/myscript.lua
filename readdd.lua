@@ -1,97 +1,72 @@
 local player = game.Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
 
--- Create GUI
+-- Logger UI
 local screenGui = Instance.new("ScreenGui", playerGui)
-screenGui.Name = "ScriptLogger"
+screenGui.Name = "UIWatcher"
 screenGui.ResetOnSpawn = false
 
--- Main draggable frame
-local frame = Instance.new("Frame", screenGui)
-frame.Size = UDim2.new(0.4, 0, 0.5, 0)
-frame.Position = UDim2.new(0.3, 0, 0.1, 0)
-frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-frame.Active = true
-frame.Draggable = true
+local logFrame = Instance.new("ScrollingFrame", screenGui)
+logFrame.Size = UDim2.new(0.4, 0, 0.5, 0)
+logFrame.Position = UDim2.new(0.55, 0, 0.45, 0)
+logFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+logFrame.BackgroundTransparency = 0.3
+logFrame.BorderSizePixel = 0
+logFrame.CanvasSize = UDim2.new(0, 0, 10, 0)
+logFrame.AutomaticCanvasSize = Enum.AutomaticSize.Y
+logFrame.ScrollBarThickness = 8
+logFrame.ClipsDescendants = true
 
--- Title
-local title = Instance.new("TextLabel", frame)
-title.Size = UDim2.new(1, 0, 0, 25)
-title.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-title.Text = "Script Logger"
-title.TextColor3 = Color3.fromRGB(255, 255, 255)
-title.TextSize = 18
-
--- Scrolling area
-local scroll = Instance.new("ScrollingFrame", frame)
-scroll.Position = UDim2.new(0, 0, 0, 25)
-scroll.Size = UDim2.new(1, 0, 1, -25)
-scroll.CanvasSize = UDim2.new(0, 0, 2, 0)
-scroll.ScrollBarThickness = 8
-scroll.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-scroll.AutomaticCanvasSize = Enum.AutomaticSize.Y
-
--- UI list layout
-local layout = Instance.new("UIListLayout", scroll)
-layout.SortOrder = Enum.SortOrder.LayoutOrder
+local layout = Instance.new("UIListLayout", logFrame)
 layout.Padding = UDim.new(0, 2)
+layout.SortOrder = Enum.SortOrder.LayoutOrder
 
--- Helper to log
-local function logAction(text)
-	local label = Instance.new("TextLabel", scroll)
+-- Function to add logs
+local function log(text)
+	local label = Instance.new("TextLabel")
 	label.Size = UDim2.new(1, -10, 0, 20)
-	label.BackgroundTransparency = 1
+	label.Text = os.date("[%H:%M:%S] ") .. text
 	label.TextColor3 = Color3.fromRGB(0, 255, 0)
 	label.TextXAlignment = Enum.TextXAlignment.Left
-	label.Text = text
-	label.TextSize = 14
+	label.BackgroundTransparency = 1
 	label.Font = Enum.Font.Code
+	label.TextSize = 14
+	label.Parent = logFrame
 end
 
--- 🟩 Example: Log movement
-local humanoid = player.Character:WaitForChild("Humanoid")
-local rootPart = player.Character:WaitForChild("HumanoidRootPart")
-local lastPosition = rootPart.Position
-
-game:GetService("RunService").Heartbeat:Connect(function()
-	local newPos = rootPart.Position
-	if (newPos - lastPosition).Magnitude > 3 then
-		logAction("MoveTo(Vector3.new(" .. math.floor(newPos.X) .. ", " .. math.floor(newPos.Y) .. ", " .. math.floor(newPos.Z) .. "))")
-		lastPosition = newPos
-	end
-end)
-
--- 🟨 Jump log
-humanoid.StateChanged:Connect(function(_, new)
-	if new == Enum.HumanoidStateType.Jumping then
-		logAction("Jump()")
-	end
-end)
-
--- 🟧 Tool equipped
-player.Character.ChildAdded:Connect(function(child)
-	if child:IsA("Tool") then
-		logAction("EquipTool('" .. child.Name .. "')")
-	end
-end)
-
--- 🟦 Chat messages
-player.Chatted:Connect(function(message)
-	logAction('Chat("' .. message .. '")')
-end)
-
--- 🟥 UI Button Clicks
--- This listens to *all* buttons in GUI
-playerGui.DescendantAdded:Connect(function(desc)
-	if desc:IsA("TextButton") or desc:IsA("ImageButton") then
-		desc.MouseButton1Click:Connect(function()
-			local path = desc:GetFullName()
-			logAction("Clicked: " .. path)
+-- Watch buttons and frames for changes
+local function watchGuiElement(instance)
+	if instance:IsA("TextButton") or instance:IsA("ImageButton") then
+		instance.MouseButton1Click:Connect(function()
+			log("Clicked: " .. instance:GetFullName() .. " [" .. (instance.Text or "No Text") .. "]")
 		end)
 	end
+
+	if instance:IsA("GuiObject") then
+		instance:GetPropertyChangedSignal("Visible"):Connect(function()
+			log("Visibility changed: " .. instance:GetFullName() .. " → " .. tostring(instance.Visible))
+		end)
+
+		instance:GetPropertyChangedSignal("Active"):Connect(function()
+			log("Active changed: " .. instance:GetFullName() .. " → " .. tostring(instance.Active))
+		end)
+	end
+end
+
+-- Recursively watch all existing GUIs
+local function scanUI(folder)
+	for _, descendant in ipairs(folder:GetDescendants()) do
+		watchGuiElement(descendant)
+	end
+end
+
+-- Initial scan
+scanUI(playerGui)
+
+-- Watch for new GUI elements
+playerGui.DescendantAdded:Connect(function(descendant)
+	watchGuiElement(descendant)
+	log("New UI element added: " .. descendant:GetFullName())
 end)
 
--- 🟫 GUI openings
-playerGui.ChildAdded:Connect(function(child)
-	logAction("Opened GUI: " .. child.Name)
-end)
+log("🟢 UI Reader started.")
