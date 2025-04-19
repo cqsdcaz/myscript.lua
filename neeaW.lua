@@ -1,6 +1,9 @@
+task.wait(30) -- Wait 30 seconds before the script starts
+
 local player = game.Players.LocalPlayer
 local TweenService = game:GetService("TweenService")
 local TeleportService = game:GetService("TeleportService")
+local UserInputService = game:GetService("UserInputService")
 
 local fruits = {
     "Rocket Fruit", "Spin Fruit", "Chop Fruit", "Spring Fruit", "Bomb Fruit", "Smoke Fruit",
@@ -12,14 +15,6 @@ local fruits = {
     "Dragon Fruit", "Leopard Fruit", "Kitsune Fruit"
 }
 
--- List of fruits that should prevent server hopping
-local noHopFruits = {
-    "Eagle Fruit", "Creation Fruit", "Buddha Fruit", "Rumble Fruit", "Portal Fruit", "Gravity Fruit", 
-    "Mammoth Fruit", "T-Rex Fruit", "Dough Fruit", "Shadow Fruit", "Venom Fruit", "Control Fruit", 
-    "Spirit Fruit", "Dragon Fruit", "Leopard Fruit", "Kitsune Fruit"
-}
-
--- Function to check if the fruit is in the fruits list
 local function isFruit(name)
     for _, fruit in ipairs(fruits) do
         if name == fruit then return true end
@@ -27,17 +22,6 @@ local function isFruit(name)
     return false
 end
 
--- Function to check if player has any of the no-hop fruits in their backpack
-local function hasNoHopFruit()
-    for _, fruitName in ipairs(noHopFruits) do
-        if player.Backpack:FindFirstChild(fruitName) then
-            return true
-        end
-    end
-    return false
-end
-
--- Function to play a sound (for effect when fruit is found)
 local function playSound(id, volume)
     local sound = Instance.new("Sound", workspace)
     sound.SoundId = id
@@ -46,7 +30,6 @@ local function playSound(id, volume)
     game:GetService("Debris"):AddItem(sound, 3)
 end
 
--- Function to create ESP for a fruit
 local function createESP(part, name)
     if not part then return end
     local billboard = Instance.new("BillboardGui", part)
@@ -63,7 +46,6 @@ local function createESP(part, name)
     text.Text = name
 end
 
--- Function to fly to the fruit
 local function flyToFruit(fruit)
     local handle = fruit:FindFirstChild("Handle")
     if not handle then return end
@@ -90,14 +72,12 @@ local function flyToFruit(fruit)
     end
 end
 
--- Function to hop servers if no fruits are found and player doesn't have no-hop fruits
 local function hopServer()
-    if hasNoHopFruit() then
-        return  -- Don't hop if the player has any of the specified fruits
-    end
-    
     local PlaceID = game.PlaceId
-    local servers = game:GetService("HttpService"):JSONDecode(game:HttpGet("https://games.roblox.com/v1/games/"..PlaceID.."/servers/Public?sortOrder=Asc&limit=100")).data
+    local servers = game:GetService("HttpService"):JSONDecode(
+        game:HttpGet("https://games.roblox.com/v1/games/"..PlaceID.."/servers/Public?sortOrder=Asc&limit=100")
+    ).data
+
     for _, server in ipairs(servers) do
         if server.playing < server.maxPlayers then
             TeleportService:TeleportToPlaceInstance(PlaceID, server.id)
@@ -106,13 +86,12 @@ local function hopServer()
     end
 end
 
--- Function to scan for fruits and fly to them
 local function scanAndFly()
     while true do
         local fruitsFound = {}
 
         for _, obj in pairs(workspace:GetChildren()) do
-            if isFruit(obj.Name) or obj:IsA("Model") and obj.Name == "Fruit" then
+            if isFruit(obj.Name) or (obj:IsA("Model") and obj.Name == "Fruit") then
                 table.insert(fruitsFound, obj)
             end
         end
@@ -127,12 +106,16 @@ local function scanAndFly()
             end
         else
             task.wait(3)
-            hopServer()  -- Hop server if no fruits found and the player doesn't have no-hop fruits
+            hopServer() -- Always hop if no fruit found
         end
 
         task.wait(2)
     end
 end
 
--- 🚀 Start auto scan and fly
-task.spawn(scanAndFly)
+local function clickAndStart()
+    task.wait(10)
+    task.spawn(scanAndFly)
+end
+
+clickAndStart()
