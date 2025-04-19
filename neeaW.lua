@@ -6,14 +6,7 @@ local HttpService = game:GetService("HttpService")
 -- Discord Webhook URL (update with your own webhook)
 local webhookURL = "https://discord.com/api/webhooks/1363192645488218122/-4Rbq5Bc-C_6qXNzc1uiAd6lUfS72GaddrlNTkw_mmcxR2UdCj4BcjYMBlCyweF4IrKA"
 
-local mythicalFruits = {
-	["Gravity Fruit"] = true, ["Mammoth Fruit"] = true, ["T-Rex Fruit"] = true,
-	["Dough Fruit"] = true, ["Shadow Fruit"] = true, ["Venom Fruit"] = true,
-	["Control Fruit"] = true, ["Spirit Fruit"] = true, ["Dragon Fruit"] = true,
-	["Leopard Fruit"] = true, ["Kitsune Fruit"] = true
-}
-
-local fruitNames = {
+local fruits = {
 	"Rocket Fruit", "Spin Fruit", "Chop Fruit", "Spring Fruit", "Bomb Fruit", "Smoke Fruit",
 	"Spike Fruit", "Flame Fruit", "Falcon Fruit", "Ice Fruit", "Sand Fruit", "Dark Fruit",
 	"Diamond Fruit", "Light Fruit", "Rubber Fruit", "Barrier Fruit", "Ghost Fruit", "Magma Fruit",
@@ -23,9 +16,9 @@ local fruitNames = {
 	"Dragon Fruit", "Leopard Fruit", "Kitsune Fruit"
 }
 
--- Function to check if the fruit is one of the listed fruits
+-- Function to check if the fruit is in the fruits list
 local function isFruit(name)
-	for _, fruit in ipairs(fruitNames) do
+	for _, fruit in ipairs(fruits) do
 		if name == fruit then return true end
 	end
 	return false
@@ -34,7 +27,7 @@ end
 -- Function to send a message to Discord webhook
 local function sendToDiscord(fruitName, serverId, seaInfo)
 	local data = {
-		content = "Mythical Fruit Found: **" .. fruitName .. "**\nServer ID: " .. serverId .. "\nSea: " .. seaInfo
+		content = "Fruit Found: **" .. fruitName .. "**\nServer ID: " .. serverId .. "\nSea: " .. seaInfo
 	}
 
 	local jsonData = HttpService:JSONEncode(data)
@@ -119,22 +112,18 @@ end
 -- Function to scan for fruits and fly to them
 local function scanAndFly()
 	while true do
-		local fruits = {}
-		local hasMythical = false
+		local fruitsFound = {}
 
 		for _, obj in pairs(workspace:GetChildren()) do
 			if isFruit(obj.Name) then
-				table.insert(fruits, obj)
-				if mythicalFruits[obj.Name] then
-					hasMythical = true
-					-- Send message to Discord webhook for mythical fruit
-					sendToDiscord(obj.Name, game.JobId, "First Sea")  -- Change "First Sea" to the actual sea info as required
-				end
+				table.insert(fruitsFound, obj)
+				-- Send message to Discord webhook for the fruit found
+				sendToDiscord(obj.Name, game.JobId, "First Sea")  -- Change "First Sea" to the actual sea info as required
 			end
 		end
 
-		if #fruits > 0 then
-			for _, fruit in ipairs(fruits) do
+		if #fruitsFound > 0 then
+			for _, fruit in ipairs(fruitsFound) do
 				if fruit and fruit:IsDescendantOf(workspace) then
 					createESP(fruit:FindFirstChild("Handle"), fruit.Name)
 					flyToFruit(fruit)
@@ -143,9 +132,7 @@ local function scanAndFly()
 			end
 		else
 			task.wait(3)
-			if not hasMythical then
-				hopServer()
-			end
+			hopServer()  -- Hop server if no fruits found
 		end
 
 		task.wait(2)
