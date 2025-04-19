@@ -1,10 +1,6 @@
 local player = game.Players.LocalPlayer
 local TweenService = game:GetService("TweenService")
 local TeleportService = game:GetService("TeleportService")
-local HttpService = game:GetService("HttpService")
-
--- Discord Webhook URL (update with your own webhook)
-local webhookURL = "https://discord.com/api/webhooks/1363192645488218122/-4Rbq5Bc-C_6qXNzc1uiAd6lUfS72GaddrlNTkw_mmcxR2UdCj4BcjYMBlCyweF4IrKA"
 
 local fruits = {
 	"Rocket Fruit", "Spin Fruit", "Chop Fruit", "Spring Fruit", "Bomb Fruit", "Smoke Fruit",
@@ -22,26 +18,6 @@ local function isFruit(name)
 		if name == fruit then return true end
 	end
 	return false
-end
-
--- Function to send a message to Discord webhook
-local function sendToDiscord(fruitName, serverId, seaInfo)
-	local data = {
-		content = "Fruit Found: **" .. fruitName .. "**\nServer ID: " .. serverId .. "\nSea: " .. seaInfo
-	}
-
-	local jsonData = HttpService:JSONEncode(data)
-
-	-- Send HTTP POST request to Discord webhook
-	local success, response = pcall(function()
-		return HttpService:PostAsync(webhookURL, jsonData, Enum.HttpContentType.ApplicationJson)
-	end)
-
-	if not success then
-		warn("Failed to send webhook: " .. response)
-	else
-		print("Successfully sent webhook for " .. fruitName)
-	end
 end
 
 -- Function to play a sound (for effect when fruit is found)
@@ -117,8 +93,7 @@ local function scanAndFly()
 		for _, obj in pairs(workspace:GetChildren()) do
 			if isFruit(obj.Name) then
 				table.insert(fruitsFound, obj)
-				-- Send message to Discord webhook for the fruit found
-				sendToDiscord(obj.Name, game.JobId, "First Sea")  -- Change "First Sea" to the actual sea info as required
+				-- No longer sending message to Discord, just detecting fruits
 			end
 		end
 
