@@ -1,7 +1,7 @@
 -- // Settings // --
 getgenv().Config = {
     ["Discord"] = { -- yuo cannot disable this. 
-        ["WebhookUrl"] = "webhookhere",
+        ["WebhookUrl"] = "https://discord.com/api/webhooks/1363192645488218122/-4Rbq5Bc-C_6qXNzc1uiAd6lUfS72GaddrlNTkw_mmcxR2UdCj4BcjYMBlCyweF4IrKA",
         ["Content"] = "@everyone", -- @everyone or <@roleid/userid>, it can be just text.
         ["BrandName"] = "catn1qqer | mirage notifier", -- you can change it to your name, but this might hurt me :(
         ["ImageUrl"] = ""
