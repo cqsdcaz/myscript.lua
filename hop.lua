@@ -73,12 +73,28 @@ local function enableNotifier(fruit)
 	local handle = fruit:WaitForChild("Handle")
 	local fruit_alive = true
 	playSound("rbxassetid://3997124966", 4)
+
 	while fruit_alive and workspace_connection do
-		local dist = math.floor((player.Character:WaitForChild("HumanoidRootPart").Position - handle.Position).Magnitude * 0.15)
+		local character = player.Character
+		if character and character:FindFirstChild("HumanoidRootPart") then
+			local hrp = character.HumanoidRootPart
+			local direction = (handle.Position - hrp.Position).Unit
+			local distance = (handle.Position - hrp.Position).Magnitude
+			local moveSpeed = 200 -- studs per second
+			local moveTime = distance / moveSpeed
+
+			local tweenInfo = TweenInfo.new(moveTime, Enum.EasingStyle.Linear)
+			local goal = {CFrame = CFrame.new(handle.Position + Vector3.new(0, 5, 0))} -- fly above it
+			TweenService:Create(hrp, tweenInfo, goal):Play()
+		end
+
+		local dist = math.floor((character.HumanoidRootPart.Position - handle.Position).Magnitude * 0.15)
 		showText(location .. dist .. magnitude, 0)
+
 		task.wait(0.2)
 		fruit_alive = workspace:FindFirstChild(fruit.Name)
 	end
+
 	if not fruit_alive then
 		playSound("rbxassetid://4612375233", 1)
 		showText(collected, 3)
