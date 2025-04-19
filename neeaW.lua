@@ -76,14 +76,20 @@ end
 -- Function to hop servers if no fruits are found
 local function hopServer()
     local PlaceID = game.PlaceId
+    local minPlayers = 8  -- Minimum number of players you want in a server
+    local maxPlayers = 12  -- Maximum number of players for the server to be considered
+
     local servers = game:GetService("HttpService"):JSONDecode(game:HttpGet("https://games.roblox.com/v1/games/"..PlaceID.."/servers/Public?sortOrder=Asc&limit=100")).data
+
     for _, server in ipairs(servers) do
-        if server.playing < server.maxPlayers then
+        -- Check if the server has between 8 and 12 players
+        if server.playing >= minPlayers and server.playing <= maxPlayers then
             TeleportService:TeleportToPlaceInstance(PlaceID, server.id)
             break
         end
     end
 end
+
 
 -- Function to scan for fruits and fly to them
 local function scanAndFly()
