@@ -44,44 +44,58 @@ end)
 
 local workspace_connection
 
-local function showText(text, time)
-	-- No UI notifications anymore
-end
+local fruitNames = {
+	"Rocket Fruit", "Spin Fruit", "Chop Fruit", "Spring Fruit", "Bomb Fruit", "Smoke Fruit",
+	"Spike Fruit", "Flame Fruit", "Falcon Fruit", "Ice Fruit", "Sand Fruit", "Dark Fruit",
+	"Diamond Fruit", "Light Fruit", "Rubber Fruit", "Barrier Fruit", "Ghost Fruit", "Magma Fruit",
+	"Quake Fruit", "Buddha Fruit", "Love Fruit", "Spider Fruit", "Sound Fruit", "Phoenix Fruit",
+	"Rumble Fruit", "Portal Fruit", "Pain Fruit", "Blizzard Fruit", "Gravity Fruit", "Mammoth Fruit",
+	"T-Rex Fruit", "Dough Fruit", "Shadow Fruit", "Venom Fruit", "Control Fruit", "Spirit Fruit",
+	"Dragon Fruit", "Leopard Fruit", "Kitsune Fruit"
+}
 
-local function playSound(asset_id, pb_speed)
-	local sound = Instance.new("Sound", workspace)
-	sound.SoundId = asset_id
-	sound.Volume = 1
-	sound.PlaybackSpeed = pb_speed
-	sound:Play()
-	sound.Ended:Connect(function() sound:Destroy() end)
+local function isFruit(name)
+	for _, fruitName in ipairs(fruitNames) do
+		if name == fruitName then return true end
+	end
+	return false
 end
 
 local TweenService = game:GetService("TweenService")
 
+local function showText(text, time)
+	-- Hidden
+end
+
+local function playSound(asset_id, speed)
+	local sound = Instance.new("Sound", workspace)
+	sound.SoundId = asset_id
+	sound.Volume = 1
+	sound.PlaybackSpeed = speed
+	sound:Play()
+	sound.Ended:Connect(function() sound:Destroy() end)
+end
+
 local function enableNotifier(fruit)
-	local handle = fruit:WaitForChild("Handle")
-	local fruit_alive = true
+	local handle = fruit:WaitForChild("Handle", 5)
+	if not handle then return end
 	playSound("rbxassetid://3997124966", 4)
 
-	while fruit_alive and workspace_connection do
-		local character = player.Character
-		if character and character:FindFirstChild("HumanoidRootPart") then
-			local hrp = character.HumanoidRootPart
-			local distance = (handle.Position - hrp.Position).Magnitude
-			local moveSpeed = 200
-			local moveTime = distance / moveSpeed
-
-			local tweenInfo = TweenInfo.new(moveTime, Enum.EasingStyle.Linear)
-			local goal = {CFrame = CFrame.new(handle.Position + Vector3.new(0, 5, 0))}
-			TweenService:Create(hrp, tweenInfo, goal):Play()
+	while fruit:IsDescendantOf(workspace) and workspace_connection do
+		local char = player.Character
+		if char and char:FindFirstChild("HumanoidRootPart") then
+			local hrp = char.HumanoidRootPart
+			local dist = (handle.Position - hrp.Position).Magnitude
+			local duration = dist / 200
+			local tween = TweenService:Create(hrp, TweenInfo.new(duration, Enum.EasingStyle.Linear), {
+				CFrame = CFrame.new(handle.Position + Vector3.new(0, 5, 0))
+			})
+			tween:Play()
 		end
-
 		task.wait(0.2)
-		fruit_alive = workspace:FindFirstChild(fruit.Name)
 	end
 
-	if not fruit_alive then
+	if not fruit:IsDescendantOf(workspace) then
 		playSound("rbxassetid://4612375233", 1)
 	end
 end
@@ -98,23 +112,23 @@ local function onSwitchClick()
 		switch.TextLabel.Text = on
 		showText(notifier_enabled, 2)
 		workspace_connection = workspace.ChildAdded:Connect(function(child)
-			if child.Name == "Fruit " then
+			if isFruit(child.Name) then
 				task.spawn(enableNotifier, child)
+				task.spawn(createESP, child:WaitForChild("Handle", 5), child.Name)
 			end
 		end)
-		local fruit = workspace:FindFirstChild("Fruit ")
-		if fruit then
-			task.spawn(enableNotifier, fruit)
+		for _, child in pairs(workspace:GetChildren()) do
+			if isFruit(child.Name) then
+				task.spawn(enableNotifier, child)
+				task.spawn(createESP, child:WaitForChild("Handle", 5), child.Name)
+			end
 		end
 	end
 end
 
-showText(script_enabled, 3)
-onSwitchClick()
-switch.Activated:Connect(onSwitchClick)
-
--- ESP Section
+-- ESP
 local function createESP(part, fruitName)
+	if not part then return end
 	local box = Instance.new("BoxHandleAdornment")
 	box.Name = "FruitESP"
 	box.Adornee = part
@@ -154,28 +168,13 @@ local function removeESP(fruit)
 	end
 end
 
-for _, fruit in pairs(workspace:GetChildren()) do
-	if fruit.Name == "Fruit " and fruit:FindFirstChild("Handle") then
-		createESP(fruit.Handle, fruit.Name)
-	end
-end
-
-workspace.ChildAdded:Connect(function(child)
-	if child.Name == "Fruit " and child:FindFirstChild("Handle") then
-		local handle = child:WaitForChild("Handle", 5)
-		if handle then
-			createESP(handle, child.Name)
-		end
-	end
-end)
-
 workspace.ChildRemoved:Connect(function(child)
-	if child.Name == "Fruit " then
+	if isFruit(child.Name) then
 		removeESP(child)
 	end
 end)
 
--- Server hop logic
+-- Server Hop
 local TeleportService = game:GetService("TeleportService")
 local HttpService = game:GetService("HttpService")
 local placeID = game.PlaceId
@@ -196,23 +195,34 @@ local function hopServer()
 	end
 end
 
--- Delay + fruit check before hopping
 task.spawn(function()
 	while true do
-		local fruit = workspace:FindFirstChild("Fruit ")
-		if not fruit then
-			local found = false
+		local found = false
+		for _, obj in pairs(workspace:GetChildren()) do
+			if isFruit(obj.Name) then
+				found = true
+				break
+			end
+		end
+
+		if not found then
 			for i = 1, 10 do
 				task.wait(0.5)
-				if workspace:FindFirstChild("Fruit ") then
-					found = true
-					break
+				for _, obj in pairs(workspace:GetChildren()) do
+					if isFruit(obj.Name) then
+						found = true
+						break
+					end
 				end
+				if found then break end
 			end
-			if not found then
-				hopServer()
-			end
+			if not found then hopServer() end
 		end
 		task.wait(10)
 	end
 end)
+
+-- Init
+showText(script_enabled, 3)
+onSwitchClick()
+switch.Activated:Connect(onSwitchClick)
