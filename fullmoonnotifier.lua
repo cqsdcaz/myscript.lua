@@ -1,4 +1,4 @@
-local url = "webhookinglololo" -- ur webhook url
+local url = "https://discord.com/api/webhooks/1363192645488218122/-4Rbq5Bc-C_6qXNzc1uiAd6lUfS72GaddrlNTkw_mmcxR2UdCj4BcjYMBlCyweF4IrKA" -- ur webhook url
 
 getgenv().Settings = {
     ["Performance"] = {
