@@ -12,7 +12,7 @@ local fruits = {
     "Quake Fruit", "Buddha Fruit", "Love Fruit", "Spider Fruit", "Sound Fruit", "Phoenix Fruit",
     "Rumble Fruit", "Portal Fruit", "Pain Fruit", "Blizzard Fruit", "Gravity Fruit", "Mammoth Fruit",
     "T-Rex Fruit", "Dough Fruit", "Shadow Fruit", "Venom Fruit", "Control Fruit", "Spirit Fruit",
-    "Dragon Fruit", "Leopard Fruit", "Kitsune Fruit"
+    "Dragon (East)","Dragon (West)","Dragon West","Dragon East", "Leopard Fruit", "Kitsune Fruit"
 }
 
 local function isFruit(name)
