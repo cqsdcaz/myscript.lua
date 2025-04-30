@@ -4,7 +4,7 @@ local TeleportService = game:GetService("TeleportService")
 local HttpService = game:GetService("HttpService")
 local player = Players.LocalPlayer
 
-local botToken = "MTM2NzIzMjk1MDE4NTIzMDQyNg.GJYMg8.j8ZJTWmqDt52NV-akriu4Ms-OYitjQbz1svR6E"  -- Replace with your Discord bot's token
+local botToken = "MTM2NzIzMjk1MDE4NTIzMDQyNg.Gf746V.dkIiJdWgioOsfnXICfEX39rBT8QBCDycBe_-J4"  -- Replace with your Discord bot's token
 local channelID = "1366820410884362270"  -- Replace with your channel's ID
 
 local function sendWebhook(msg)
