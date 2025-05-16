@@ -11,6 +11,7 @@ local fruitMeshes = {
     ["rbxassetid://15100283484"] = "Light Fruit",
     ["rbxassetid://15112215862"] = "Portal Fruit",
     ["rbxassetid://15104782377"] = "Blade Fruit"
+    ["rbxassetid://15057683975"] = "Spin Fruit"
 }
 
 
