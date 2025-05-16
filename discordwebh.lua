@@ -9,6 +9,14 @@ local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
 local webhookUrl = "https://discord.com/api/webhooks/1366820449543000186/kSlzHmE3tej96cmjX36BppUzS_X3S-bDwr4KWiTKtWjXNWlq1AhF_xFArNdGD67xMX-y"
 
 local placeId = game.PlaceId
+local jobId = game.JobId
+
+-- PlaceId to Sea mapping
+local seaName = ({
+    [2753915549] = "Sea 1",
+    [4442272183] = "Sea 2",
+    [7449423635] = "Sea 3"
+})[placeId] or "Unknown Sea"
 
 local fruitMeshes = {
     ["rbxassetid://15116696973"] = "Smoke Fruit",
@@ -82,12 +90,11 @@ local function checkFruit()
                 end
 
                 if not alreadySent then
+                    local locationInfo = string.format("📍 Location: %s\n🌊 %s | 🗺️ PlaceId: %d\n🧾 JobId: %s", tostring(position), seaName, placeId, jobId)
                     if fruitName then
-                        local message = "🍇 **" .. fruitName .. "** has spawned!\n📍 Location: " .. tostring(position) .. "\n🧬 MeshId: " .. meshId .. "\n🎮 PlaceId: " .. placeId
-                        sendToDiscord(message)
+                        sendToDiscord(string.format("🍇 **%s** has spawned!\n%s\n🧬 MeshId: %s", fruitName, locationInfo, meshId))
                     else
-                        local message = "❓ **Unknown Fruit** detected!\n📍 Location: " .. tostring(position) .. "\n🧬 MeshId: " .. meshId .. "\n🎮 PlaceId: " .. placeId
-                        sendToDiscord(message)
+                        sendToDiscord(string.format("❓ **Unknown Fruit** detected!\n%s\n🧬 MeshId: %s", locationInfo, meshId))
                     end
                     flyTo(position)
                     alreadySent = true
@@ -98,7 +105,7 @@ local function checkFruit()
     end
 
     if lastKnownFruit ~= nil then
-        sendToDiscord("❌ Fruit has despawned or was picked up.")  -- no PlaceId here
+        sendToDiscord("❌ Fruit has despawned or was picked up.")
         lastKnownFruit = nil
         alreadySent = false
         RunService:UnbindFromRenderStep("FlyToFruit")
