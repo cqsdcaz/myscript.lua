@@ -66,16 +66,6 @@ local function sendToDiscord(message)
     end
 end
 
--- Auto Fly to Fruit
-local function flyTo(position)
-    RunService:BindToRenderStep("FlyToFruit", Enum.RenderPriority.Character.Value, function()
-        if character and humanoidRootPart then
-            local direction = (position - humanoidRootPart.Position).Unit
-            humanoidRootPart.Velocity = direction * 250 -- Change speed here if needed
-        end
-    end)
-end
-
 -- GUI Setup
 local playerGui = player:WaitForChild("PlayerGui")
 
@@ -95,16 +85,27 @@ teleportButton.TextSize = 24
 teleportButton.Visible = false
 teleportButton.Parent = screenGui
 
+local distanceLabel = Instance.new("TextLabel")
+distanceLabel.Size = UDim2.new(0, 200, 0, 30)
+distanceLabel.Position = UDim2.new(0.5, -100, 0.85, 0)
+distanceLabel.BackgroundTransparency = 1
+distanceLabel.TextColor3 = Color3.new(1, 1, 1)
+distanceLabel.Font = Enum.Font.SourceSansBold
+distanceLabel.TextSize = 20
+distanceLabel.Text = ""
+distanceLabel.Visible = false
+distanceLabel.Parent = screenGui
+
+-- Track state
 local fruitPosition = nil
+local lastKnownFruit = nil
+local alreadySent = false
+
 teleportButton.MouseButton1Click:Connect(function()
     if fruitPosition and humanoidRootPart then
         humanoidRootPart.CFrame = CFrame.new(fruitPosition + Vector3.new(0, 5, 0))
     end
 end)
-
--- Track state
-local lastKnownFruit = nil
-local alreadySent = false
 
 -- Fruit Detection
 local function checkFruit()
@@ -130,19 +131,20 @@ local function checkFruit()
                     local message = string.format("🍇 **%s** has spawned!\n📍 Location: `%s`\n🧬 MeshId: `%s`\n%s\n🆔 PlaceId: `%s`\n🔁 JobId: `%s`",
                         fruitName, tostring(position), meshId, seaName, placeId, jobId)
                     sendToDiscord(message)
-                    flyTo(position)
                     fruitPosition = position
                     teleportButton.Visible = true
+                    distanceLabel.Visible = true
                     alreadySent = true
                 elseif not fruitName and not alreadySent then
                     local message = string.format("❓ **Unknown Fruit** detected!\n📍 Location: `%s`\n🧬 MeshId: `%s`\n%s\n🆔 PlaceId: `%s`\n🔁 JobId: `%s`",
                         tostring(position), meshId, seaName, placeId, jobId)
                     sendToDiscord(message)
-                    flyTo(position)
                     fruitPosition = position
                     teleportButton.Visible = true
+                    distanceLabel.Visible = true
                     alreadySent = true
                 end
+
                 return
             end
         end
@@ -153,11 +155,21 @@ local function checkFruit()
         sendToDiscord("❌ Fruit has despawned or was picked up.")
         lastKnownFruit = nil
         alreadySent = false
-        RunService:UnbindFromRenderStep("FlyToFruit")
         teleportButton.Visible = false
+        distanceLabel.Visible = false
         fruitPosition = nil
     end
 end
+
+-- Distance updater
+RunService.RenderStepped:Connect(function()
+    if fruitPosition and humanoidRootPart then
+        local distance = (fruitPosition - humanoidRootPart.Position).Magnitude
+        distanceLabel.Text = string.format("📏 %.1f meters away", distance)
+    else
+        distanceLabel.Text = ""
+    end
+end)
 
 -- Loop to keep checking
 while true do
