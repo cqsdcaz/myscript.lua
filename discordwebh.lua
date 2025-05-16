@@ -10,7 +10,7 @@ local fruitMeshes = {
     ["rbxassetid://15116747420"] = "Rumble Fruit",
     ["rbxassetid://15100283484"] = "Light Fruit",
     ["rbxassetid://15112215862"] = "Portal Fruit",
-    ["rbxassetid://15104782377"] = "Blade Fruit"
+    ["rbxassetid://15104782377"] = "Fruit"
 }
 
 -- Function to send a message to Discord Webhook
