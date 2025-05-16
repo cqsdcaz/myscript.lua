@@ -6,10 +6,10 @@ local player = Players.LocalPlayer
 local character = player.Character or player.CharacterAdded:Wait()
 local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
 
--- Discord Webhook URL
 local webhookUrl = "https://discord.com/api/webhooks/1366820449543000186/kSlzHmE3tej96cmjX36BppUzS_X3S-bDwr4KWiTKtWjXNWlq1AhF_xFArNdGD67xMX-y"
 
--- Fruit MeshId lookup
+local placeId = game.PlaceId
+
 local fruitMeshes = {
     ["rbxassetid://15116696973"] = "Smoke Fruit",
     ["rbxassetid://15116740364"] = "Bomb Fruit",
@@ -26,7 +26,6 @@ local fruitMeshes = {
     ["rbxassetid://15057683975"] = "Spin Fruit"
 }
 
--- Discord Webhook Sender
 local function sendToDiscord(message)
     local data = { content = message }
     local jsonData = HttpService:JSONEncode(data)
@@ -53,7 +52,6 @@ local function sendToDiscord(message)
     end
 end
 
--- Auto Fly to Fruit
 local function flyTo(position)
     RunService:BindToRenderStep("FlyToFruit", Enum.RenderPriority.Character.Value, function()
         if character and humanoidRootPart then
@@ -63,11 +61,9 @@ local function flyTo(position)
     end)
 end
 
--- Track state
 local lastKnownFruit = nil
 local alreadySent = false
 
--- Fruit Detection
 local function checkFruit()
     local fruitContainer = workspace:FindFirstChild("Fruit ")
     if fruitContainer then
@@ -84,32 +80,30 @@ local function checkFruit()
                     alreadySent = false
                 end
 
-                if fruitName and not alreadySent then
-                    local message = "🍇 **" .. fruitName .. "** has spawned!\n📍 Location: " .. tostring(position) .. "\n🧬 MeshId: " .. meshId
-                    sendToDiscord(message)
-                    flyTo(position)
-                    alreadySent = true
-                elseif not fruitName and not alreadySent then
-                    local message = "❓ **Unknown Fruit** detected!\n📍 Location: " .. tostring(position) .. "\n🧬 MeshId: " .. meshId
-                    sendToDiscord(message)
+                if not alreadySent then
+                    if fruitName then
+                        local message = "🍇 **" .. fruitName .. "** has spawned!\n📍 Location: " .. tostring(position) .. "\n🧬 MeshId: " .. meshId .. "\n🎮 PlaceId: " .. placeId
+                        sendToDiscord(message)
+                    else
+                        local message = "❓ **Unknown Fruit** detected!\n📍 Location: " .. tostring(position) .. "\n🧬 MeshId: " .. meshId .. "\n🎮 PlaceId: " .. placeId
+                        sendToDiscord(message)
+                    end
                     flyTo(position)
                     alreadySent = true
                 end
-                return -- Still found fruit, exit early
+                return
             end
         end
     end
 
-    -- Despawned
     if lastKnownFruit ~= nil then
-        sendToDiscord("❌ Fruit has despawned or was picked up.")
+        sendToDiscord("❌ Fruit has despawned or was picked up.")  -- no PlaceId here
         lastKnownFruit = nil
         alreadySent = false
         RunService:UnbindFromRenderStep("FlyToFruit")
     end
 end
 
--- Loop to keep checking
 while true do
     pcall(checkFruit)
     wait(1)
