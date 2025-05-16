@@ -10,7 +10,7 @@ local fruitMeshes = {
     ["rbxassetid://15116747420"] = "Rumble Fruit",
     ["rbxassetid://15100283484"] = "Light Fruit",
     ["rbxassetid://15112215862"] = "Portal Fruit",
-    ["rbxassetid://15104782377"] = "Blade Fruit"
+    ["rbxassetid://15104782377"] = "Blade Fruit",
     ["rbxassetid://15057683975"] = "Spin Fruit"
 }
 
@@ -81,4 +81,7 @@ local function checkFruitAndSendToDiscord()
 end
 
 
-checkFruitAndSendToDiscord()
+while true do
+    checkFruitAndSendToDiscord()
+    wait(1) -- wait 10 seconds before checking again
+end
