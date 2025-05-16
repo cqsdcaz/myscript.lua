@@ -77,5 +77,5 @@ end
 
 while true do
     checkFruit()
-    wait(5)
+    wait(1)
 end
