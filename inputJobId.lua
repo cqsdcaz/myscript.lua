@@ -19,7 +19,7 @@ local dragging, dragInput, dragStart, startPos = false
 btn.MouseButton1Click:Connect(function()
 	if box.Text ~= "" then
 		pcall(function()
-			T:TeleportToPlaceInstance(2753915549, box.Text, player)
+			T:TeleportToPlaceInstance(4442272183, box.Text, player)
 		end)
 	end
 end)
