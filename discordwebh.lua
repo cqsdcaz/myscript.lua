@@ -6,7 +6,7 @@ local player = Players.LocalPlayer
 local character = player.Character or player.CharacterAdded:Wait()
 local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
 
--- Discord Webhook URL
+-- Webhook
 local webhookUrl = "https://discord.com/api/webhooks/1366820449543000186/kSlzHmE3tej96cmjX36BppUzS_X3S-bDwr4KWiTKtWjXNWlq1AhF_xFArNdGD67xMX-y"
 
 -- Fruit MeshId lookup
@@ -26,7 +26,7 @@ local fruitMeshes = {
     ["rbxassetid://15057683975"] = "Spin Fruit"
 }
 
--- Determine Sea from PlaceId
+-- Sea Name
 local function getSeaName(placeId)
     if placeId == 2753915549 then
         return "🌊 Sea 1"
@@ -39,7 +39,7 @@ local function getSeaName(placeId)
     end
 end
 
--- Discord Webhook Sender
+-- Webhook sender
 local function sendToDiscord(message)
     local data = { content = message }
     local jsonData = HttpService:JSONEncode(data)
@@ -47,30 +47,22 @@ local function sendToDiscord(message)
 
     local requestFunc = syn and syn.request or http_request or request or (fluxus and fluxus.request)
     if requestFunc then
-        local success, response = pcall(function()
-            return requestFunc({
+        pcall(function()
+            requestFunc({
                 Url = webhookUrl,
                 Method = "POST",
                 Headers = headers,
                 Body = jsonData
             })
         end)
-
-        if success then
-            print("✅ Message sent to Discord!")
-        else
-            warn("❌ Failed to send message to Discord:", response)
-        end
-    else
-        warn("❌ No supported HTTP request function found.")
     end
 end
 
--- GUI Setup
+-- GUI
 local playerGui = player:WaitForChild("PlayerGui")
 
 local screenGui = Instance.new("ScreenGui")
-screenGui.Name = "FruitTeleportGui"
+screenGui.Name = "FruitESP"
 screenGui.ResetOnSpawn = false
 screenGui.Parent = playerGui
 
@@ -85,29 +77,33 @@ teleportButton.TextSize = 24
 teleportButton.Visible = false
 teleportButton.Parent = screenGui
 
-local distanceLabel = Instance.new("TextLabel")
-distanceLabel.Size = UDim2.new(0, 200, 0, 30)
-distanceLabel.Position = UDim2.new(0.5, -100, 0.85, 0)
-distanceLabel.BackgroundTransparency = 1
-distanceLabel.TextColor3 = Color3.new(1, 1, 1)
-distanceLabel.Font = Enum.Font.SourceSansBold
-distanceLabel.TextSize = 20
-distanceLabel.Text = ""
-distanceLabel.Visible = false
-distanceLabel.Parent = screenGui
-
--- Track state
 local fruitPosition = nil
-local lastKnownFruit = nil
-local alreadySent = false
-
 teleportButton.MouseButton1Click:Connect(function()
     if fruitPosition and humanoidRootPart then
         humanoidRootPart.CFrame = CFrame.new(fruitPosition + Vector3.new(0, 5, 0))
     end
 end)
 
--- Fruit Detection
+-- ESP label
+local billboardGui = Instance.new("BillboardGui")
+billboardGui.Size = UDim2.new(0, 200, 0, 50)
+billboardGui.StudsOffset = Vector3.new(0, 3, 0)
+billboardGui.AlwaysOnTop = true
+
+local label = Instance.new("TextLabel")
+label.Size = UDim2.new(1, 0, 1, 0)
+label.BackgroundTransparency = 1
+label.TextColor3 = Color3.new(1, 1, 1)
+label.TextStrokeTransparency = 0
+label.Font = Enum.Font.SourceSansBold
+label.TextScaled = true
+label.Parent = billboardGui
+
+-- Track state
+local lastKnownFruit = nil
+local alreadySent = false
+
+-- Fruit detection
 local function checkFruit()
     local fruitContainer = workspace:FindFirstChild("Fruit ")
     if fruitContainer then
@@ -117,32 +113,35 @@ local function checkFruit()
             if fruitPart and fruitPart:IsA("MeshPart") then
                 local meshId = fruitPart.MeshId
                 local position = fruitPart.Position
-                local fruitName = fruitMeshes[meshId]
+                local fruitName = fruitMeshes[meshId] or "Unknown Fruit"
                 local placeId = game.PlaceId
                 local seaName = getSeaName(placeId)
                 local jobId = game.JobId
+
+                local distance = math.floor((humanoidRootPart.Position - position).Magnitude)
 
                 if fruitPart ~= lastKnownFruit then
                     lastKnownFruit = fruitPart
                     alreadySent = false
                 end
 
-                if fruitName and not alreadySent then
+                if not alreadySent then
                     local message = string.format("🍇 **%s** has spawned!\n📍 Location: `%s`\n🧬 MeshId: `%s`\n%s\n🆔 PlaceId: `%s`\n🔁 JobId: `%s`",
                         fruitName, tostring(position), meshId, seaName, placeId, jobId)
                     sendToDiscord(message)
-                    fruitPosition = position
                     teleportButton.Visible = true
-                    distanceLabel.Visible = true
-                    alreadySent = true
-                elseif not fruitName and not alreadySent then
-                    local message = string.format("❓ **Unknown Fruit** detected!\n📍 Location: `%s`\n🧬 MeshId: `%s`\n%s\n🆔 PlaceId: `%s`\n🔁 JobId: `%s`",
-                        tostring(position), meshId, seaName, placeId, jobId)
-                    sendToDiscord(message)
                     fruitPosition = position
-                    teleportButton.Visible = true
-                    distanceLabel.Visible = true
                     alreadySent = true
+
+                    -- ESP
+                    billboardGui:Clone().Parent = fruitPart
+                    fruitPart:FindFirstChildOfClass("BillboardGui").TextLabel.Text = string.format("%s\n📏 %d meters", fruitName, distance)
+                end
+
+                -- Update ESP distance live
+                local gui = fruitPart:FindFirstChildOfClass("BillboardGui")
+                if gui then
+                    gui.TextLabel.Text = string.format("%s\n📏 %d meters", fruitName, distance)
                 end
 
                 return
@@ -153,25 +152,17 @@ local function checkFruit()
     -- Despawned
     if lastKnownFruit ~= nil then
         sendToDiscord("❌ Fruit has despawned or was picked up.")
+        if lastKnownFruit:FindFirstChildOfClass("BillboardGui") then
+            lastKnownFruit:FindFirstChildOfClass("BillboardGui"):Destroy()
+        end
         lastKnownFruit = nil
         alreadySent = false
         teleportButton.Visible = false
-        distanceLabel.Visible = false
         fruitPosition = nil
     end
 end
 
--- Distance updater
-RunService.RenderStepped:Connect(function()
-    if fruitPosition and humanoidRootPart then
-        local distance = (fruitPosition - humanoidRootPart.Position).Magnitude
-        distanceLabel.Text = string.format("📏 %.1f meters away", distance)
-    else
-        distanceLabel.Text = ""
-    end
-end)
-
--- Loop to keep checking
+-- Loop
 while true do
     pcall(checkFruit)
     wait(1)
