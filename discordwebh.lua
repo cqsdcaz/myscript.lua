@@ -14,11 +14,9 @@ local fruitMeshes = {
     ["rbxassetid://15057683975"] = "Spin Fruit"
 }
 
-
 local function sendToDiscord(message)
     local data = { content = message }
     local jsonData = HttpService:JSONEncode(data)
-
     local headers = { ["Content-Type"] = "application/json" }
 
     local requestFunc = syn and syn.request or http_request or request or (fluxus and fluxus.request)
@@ -43,45 +41,41 @@ local function sendToDiscord(message)
     end
 end
 
+-- Track last known fruit MeshId and if it's currently present
+local lastMeshId = nil
+local fruitPresent = false
 
-local function checkFruitAndSendToDiscord()
-    local fruitContainer = workspace:FindFirstChild("Fruit ")  -- With space in the name
-    if not fruitContainer then
-        print("❌ Fruit model not found.")
-        return
-    end
+local function checkFruit()
+    local fruitContainer = workspace:FindFirstChild("Fruit ")
+    if fruitContainer and fruitContainer:FindFirstChild("Fruit") and fruitContainer.Fruit:FindFirstChild("Fruit") then
+        local fruitPart = fruitContainer.Fruit.Fruit
+        if fruitPart:IsA("MeshPart") then
+            local meshId = fruitPart.MeshId
 
-    local fruitModel = fruitContainer:FindFirstChild("Fruit")
-    if not fruitModel then
-        print("❌ 'Fruit' child not found inside 'Fruit '.")
-        return
-    end
+            -- Only notify if the fruit is new
+            if meshId ~= lastMeshId then
+                lastMeshId = meshId
+                fruitPresent = true
 
-    local fruitPart = fruitModel:FindFirstChild("Fruit")
-    if not fruitPart or not fruitPart:IsA("MeshPart") then
-        print("❌ MeshPart not found at expected path.")
-        return
-    end
-
-    local meshId = fruitPart.MeshId
-    print("🔍 Found MeshId: " .. meshId)
-
-    local fruitName = fruitMeshes[meshId]
-    local position = tostring(fruitPart.Position)
-
-    if fruitName then
-        local message = "🍇 **" .. fruitName .. "** has spawned!\n📍 Location: " .. position .. "\n🧬 MeshId: " .. meshId
-        sendToDiscord(message)
-        print("✅ Known fruit sent to Discord.")
+                local fruitName = fruitMeshes[meshId] or "Unknown Fruit"
+                local position = tostring(fruitPart.Position)
+                local message = "🍇 **" .. fruitName .. "** has spawned!\n📍 Location: " .. position .. "\n🧬 MeshId: " .. meshId
+                sendToDiscord(message)
+                print("✅ Fruit spawned: " .. fruitName)
+            end
+        end
     else
-        local message = "❓ **Unknown Fruit** detected!\n📍 Location: " .. position .. "\n🧬 MeshId: " .. meshId
-        sendToDiscord(message)
-        print("⚠️ Unknown fruit MeshId: " .. meshId .. " - message sent.")
+        -- Fruit is not present, but was previously — send despawn notice
+        if fruitPresent then
+            sendToDiscord("❌ The fruit has despawned or been taken from the map.")
+            print("⚠️ Fruit despawned.")
+            lastMeshId = nil
+            fruitPresent = false
+        end
     end
 end
 
-
 while true do
-    checkFruitAndSendToDiscord()
-    wait(1) -- wait 10 seconds before checking again
+    checkFruit()
+    wait(5)
 end
