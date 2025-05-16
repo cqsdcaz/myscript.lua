@@ -3,10 +3,8 @@ local RunService = game:GetService("RunService")
 local TeleportService = game:GetService("TeleportService")
 local HttpService = game:GetService("HttpService")
 local player = Players.LocalPlayer
-
 local botToken = "MTM2NzIzMjk1MDE4NTIzMDQyNg.G_cviT._MGBY66XGKsPAOzFAStezj3iiml09AQRq3YogM"  -- Replace with your Discord bot's token
 local channelID = "1366820410884362270"  -- Replace with your channel's ID
-
 local function sendWebhook(msg)
     local url = "https://discord.com/api/v10/channels/"..channelID.."/messages"
     local headers = {
@@ -20,7 +18,6 @@ local function sendWebhook(msg)
         HttpService:PostAsync(url, body, Enum.HttpContentType.ApplicationJson, false, headers)
     end)
 end
-
 local function hop()
     local id = game.PlaceId
     local ok, s = pcall(function()
@@ -35,21 +32,18 @@ local function hop()
         end
     end
 end
-
 local f = workspace:FindFirstChild("Fruit")
 if not f then 
     sendWebhook(":x: Fruit not found!")
     hop()
     return
 end
-
 local i = f:FindFirstChild("Fruit")
 if not i or not i:FindFirstChild("RootPart") then 
     sendWebhook(":x: Fruit not found!")
     hop()
     return
 end
-
 sendWebhook(":pineapple: Fruit found!")
 local c = player.Character or player.CharacterAdded:Wait()
 local h = c:WaitForChild("HumanoidRootPart")
