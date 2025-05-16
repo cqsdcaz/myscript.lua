@@ -12,6 +12,7 @@ local webhookUrl = "https://discord.com/api/webhooks/1366820449543000186/kSlzHmE
 -- Fruit MeshId lookup
 local fruitMeshes = {
     ["rbxassetid://15116696973"] = "Smoke Fruit",
+    ["rbxassetid://15116740364"] = "Bomb Fruit",
     ["rbxassetid://15111517529"] = "Sand Fruit",
     ["rbxassetid://15116747420"] = "Rumble Fruit",
     ["rbxassetid://15100283484"] = "Light Fruit",
@@ -57,7 +58,7 @@ local function flyTo(position)
     RunService:BindToRenderStep("FlyToFruit", Enum.RenderPriority.Character.Value, function()
         if character and humanoidRootPart then
             local direction = (position - humanoidRootPart.Position).Unit
-            humanoidRootPart.Velocity = direction * 150
+            humanoidRootPart.Velocity = direction * 250
         end
     end)
 end
