@@ -1,8 +1,8 @@
 local HttpService = game:GetService("HttpService")
-
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
 
 local webhookUrl = "https://discord.com/api/webhooks/1366820449543000186/kSlzHmE3tej96cmjX36BppUzS_X3S-bDwr4KWiTKtWjXNWlq1AhF_xFArNdGD67xMX-y"
-
 
 local fruitMeshes = {
     ["rbxassetid://15116696973"] = "Smoke Fruit",
@@ -14,11 +14,19 @@ local fruitMeshes = {
     ["rbxassetid://15057683975"] = "Spin Fruit"
 }
 
+local player = Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+
+local lastKnownFruit = nil
+local alreadySent = false
+
+-- 🧃 Send Discord Message
 local function sendToDiscord(message)
     local data = { content = message }
     local jsonData = HttpService:JSONEncode(data)
-    local headers = { ["Content-Type"] = "application/json" }
 
+    local headers = { ["Content-Type"] = "application/json" }
     local requestFunc = syn and syn.request or http_request or request or (fluxus and fluxus.request)
 
     if requestFunc then
@@ -32,50 +40,71 @@ local function sendToDiscord(message)
         end)
 
         if success then
-            print("✅ Message sent to Discord!")
+            print("✅ Sent to Discord!")
         else
-            warn("❌ Failed to send message to Discord:", response)
+            warn("❌ Failed to send message:", response)
         end
     else
-        warn("❌ No supported HTTP request function found.")
+        warn("❌ No HTTP request method found.")
     end
 end
 
--- Track last known fruit MeshId and if it's currently present
-local lastMeshId = nil
-local fruitPresent = false
+-- ✈️ Move to fruit
+local function flyTo(position)
+    RunService:BindToRenderStep("FlyToFruit", Enum.RenderPriority.Character.Value + 1, function()
+        if not character or not character.Parent then return end
 
+        local direction = (position - humanoidRootPart.Position).Unit
+        local distance = (position - humanoidRootPart.Position).Magnitude
+
+        humanoidRootPart.Velocity = direction * 60
+
+        if distance < 5 then
+            humanoidRootPart.Velocity = Vector3.zero
+            RunService:UnbindFromRenderStep("FlyToFruit")
+        end
+    end)
+end
+
+-- 🍇 Check fruit
 local function checkFruit()
     local fruitContainer = workspace:FindFirstChild("Fruit ")
     if fruitContainer and fruitContainer:FindFirstChild("Fruit") and fruitContainer.Fruit:FindFirstChild("Fruit") then
         local fruitPart = fruitContainer.Fruit.Fruit
         if fruitPart:IsA("MeshPart") then
             local meshId = fruitPart.MeshId
+            local position = fruitPart.Position
+            local fruitName = fruitMeshes[meshId]
 
-            -- Only notify if the fruit is new
-            if meshId ~= lastMeshId then
-                lastMeshId = meshId
-                fruitPresent = true
+            if fruitPart ~= lastKnownFruit then
+                lastKnownFruit = fruitPart
+                alreadySent = false
+            end
 
-                local fruitName = fruitMeshes[meshId] or "Unknown Fruit"
-                local position = tostring(fruitPart.Position)
-                local message = "🍇 **" .. fruitName .. "** has spawned!\n📍 Location: " .. position .. "\n🧬 MeshId: " .. meshId
+            if fruitName and not alreadySent then
+                local message = "🍇 **" .. fruitName .. "** has spawned!\n📍 Location: " .. tostring(position) .. "\n🧬 MeshId: " .. meshId
                 sendToDiscord(message)
-                print("✅ Fruit spawned: " .. fruitName)
+                flyTo(position)
+                alreadySent = true
+            elseif not fruitName and not alreadySent then
+                local message = "❓ **Unknown Fruit** detected!\n📍 Location: " .. tostring(position) .. "\n🧬 MeshId: " .. meshId
+                sendToDiscord(message)
+                flyTo(position)
+                alreadySent = true
             end
         end
     else
-        -- Fruit is not present, but was previously — send despawn notice
-        if fruitPresent then
-            sendToDiscord("❌ The fruit has despawned or been taken from the map.")
-            print("⚠️ Fruit despawned.")
-            lastMeshId = nil
-            fruitPresent = false
+        if lastKnownFruit ~= nil then
+            sendToDiscord("❌ Fruit has despawned or was picked up.")
+            lastKnownFruit = nil
+            alreadySent = false
+            RunService:UnbindFromRenderStep("FlyToFruit")
         end
     end
 end
 
+-- 🔁 Loop check
 while true do
-    checkFruit()
+    pcall(checkFruit)
     wait(1)
 end
