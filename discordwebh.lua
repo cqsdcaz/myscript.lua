@@ -12,6 +12,7 @@ local placeId = game.PlaceId
 
 local fruitMeshes = {
     ["rbxassetid://15116696973"] = "Smoke Fruit",
+    ["rbxassetid://15105281957"] = "Spring Fruit",
     ["rbxassetid://15116740364"] = "Bomb Fruit",
     ["rbxassetid://15111517529"] = "Sand Fruit",
     ["rbxassetid://15116747420"] = "Rumble Fruit",
