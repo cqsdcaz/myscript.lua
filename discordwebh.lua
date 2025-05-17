@@ -37,8 +37,10 @@ local fruitMeshes = {
     ["rbxassetid://15112263502"] = "Shadow Fruit",
     ["rbxassetid://10395895511"] = "Vemon Fruit",
     ["rbxassetid://104856271432800"] = "Gas Fruit",
-    [""] = " Fruit",
-    [""] = " Fruit",
+    ["rbxassetid://15100184583"] = "Control Fruit",
+    ["rbxassetid://96747665551647"] = "Yeti Fruit",
+    ["rbxassetid://15106768588"] = "Leopard Fruit",
+    ["rbxassetid://15482881956"] = "Kitsune Fruit",
     ["rbxassetid://89477866336962"] = "Creation Fruit",
     ["rbxassetid://90582921962686"] = "Gravity Fruit",
     ["rbxassetid://15057683975"] = "Spin Fruit"
@@ -151,7 +153,77 @@ local function checkFruit()
             end
         end
     end
+-- ADDITIONAL SPECIFIC SEARCH FOR workspace.Fruit.Fruit.Gas
+local gasFruit = workspace:FindFirstChild("Fruit")
+    and workspace.Fruit:FindFirstChild("Fruit")
+    and workspace.Fruit.Fruit:FindFirstChild("Gas")
 
+if gasFruit and gasFruit:IsA("MeshPart") then
+    local meshId = gasFruit.MeshId
+    local fruitName = fruitMeshes[meshId] or "Gas Fruit"
+    local position = gasFruit.Position
+    local distance = math.floor((humanoidRootPart.Position - position).Magnitude)
+
+    if gasFruit ~= lastKnownFruit then
+        lastKnownFruit = gasFruit
+        alreadySent = false
+    end
+
+    if not alreadySent then
+        local msg = string.format("🌫️ **%s** has spawned!\n📍 Location: %s\n🧬 MeshId: %s\n%s\n🆔 PlaceId: %s\n🔁 JobId: %s",
+            fruitName, tostring(position), meshId, getSeaName(game.PlaceId), game.PlaceId, game.JobId)
+        sendToDiscord(msg)
+        teleportButton.Visible = true
+        fruitPosition = position
+        alreadySent = true
+
+        createESP(gasFruit, fruitName, distance)
+    end
+
+    local espGui = gasFruit:FindFirstChild("FruitESP")
+    if espGui and espGui:FindFirstChildOfClass("TextLabel") then
+        espGui.TextLabel.Text = fruitName .. "\n📏 " .. tostring(distance) .. " meters"
+    end
+
+    return
+end
+
+    -- Additional specific search for workspace.Fruit.Fruit.Neon
+local neonFruit = workspace:FindFirstChild("Fruit")
+    and workspace.Fruit:FindFirstChild("Fruit")
+    and workspace.Fruit.Fruit:FindFirstChild("Neon")
+
+if neonFruit and neonFruit:IsA("MeshPart") then
+    local meshId = neonFruit.MeshId
+    local fruitName = fruitMeshes[meshId] or "Yeti Fruit"
+    local position = neonFruit.Position
+    local distance = math.floor((humanoidRootPart.Position - position).Magnitude)
+
+    if neonFruit ~= lastKnownFruit then
+        lastKnownFruit = neonFruit
+        alreadySent = false
+    end
+
+    if not alreadySent then
+        local msg = string.format("✨ **%s** has spawned!\n📍 Location: %s\n🧬 MeshId: %s\n%s\n🆔 PlaceId: %s\n🔁 JobId: %s",
+            fruitName, tostring(position), meshId, getSeaName(game.PlaceId), game.PlaceId, game.JobId)
+        sendToDiscord(msg)
+        teleportButton.Visible = true
+        fruitPosition = position
+        alreadySent = true
+
+        createESP(neonFruit, fruitName, distance)
+    end
+
+    local espGui = neonFruit:FindFirstChild("FruitESP")
+    if espGui and espGui:FindFirstChildOfClass("TextLabel") then
+        espGui.TextLabel.Text = fruitName .. "\n📏 " .. tostring(distance) .. " meters"
+    end
+
+    return
+end
+
+    
     -- Additional specific search for workspace.Fruit.Fruit.Flame
     local flameFruit = workspace:FindFirstChild("Fruit")
         and workspace.Fruit:FindFirstChild("Fruit")
