@@ -225,39 +225,41 @@ end
 
     
     -- Additional specific search for workspace.Fruit.Fruit.Flame
-    local flameFruit = workspace:FindFirstChild("Fruit")
-        and workspace.Fruit:FindFirstChild("Fruit")
-        and workspace.Fruit.Fruit:FindFirstChild("Flame")
+   -- Additional specific search for workspace.Fruit.Fruit.Flame
+local flameFruit = workspace:FindFirstChild("Fruit")
+    and workspace.Fruit:FindFirstChild("Fruit")
+    and workspace.Fruit.Fruit:FindFirstChild("Flame")
 
-    if flameFruit and flameFruit:IsA("MeshPart") then
-        local meshId = flameFruit.MeshId
-        local fruitName = fruitMeshes[meshId] or "Flame Fruit"
-        local position = flameFruit.Position
-        local distance = math.floor((humanoidRootPart.Position - position).Magnitude)
+if flameFruit and flameFruit:IsA("MeshPart") then
+    local meshId = flameFruit.MeshId
+    local fruitName = fruitMeshes[meshId] or "Flame Fruit"
+    local position = flameFruit.Position
+    local distance = math.floor((humanoidRootPart.Position - position).Magnitude)
 
-        if flameFruit ~= lastKnownFruit then
-            lastKnownFruit = flameFruit
-            alreadySent = false
-        end
-
-        if not alreadySent then
-            local msg = string.format("🔥 **%s** has spawned!\n📍 Location: %s\n🧬 MeshId: %s\n%s\n🆔 PlaceId: %s\n🔁 JobId: %s",
-                fruitName, tostring(position), meshId, getSeaName(game.PlaceId), game.PlaceId, game.JobId)
-            sendToDiscord(msg)
-            teleportButton.Visible = true
-            fruitPosition = position
-            alreadySent = true
-
-            createESP(flameFruit, fruitName, distance)
-        end
-
-        local espGui = flameFruit:FindFirstChild("FruitESP")
-        if espGui and espGui:FindFirstChildOfClass("TextLabel") then
-            espGui.TextLabel.Text = fruitName .. "\n📏 " .. tostring(distance) .. " meters"
-        end
-
-        return
+    if flameFruit ~= lastKnownFruit then
+        lastKnownFruit = flameFruit
+        alreadySent = false
     end
+
+    if not alreadySent then
+        local msg = string.format("🔥 **%s** has spawned!\n📍 Location: %s\n🧬 MeshId: %s\n%s\n🆔 PlaceId: %s\n🔁 JobId: %s",
+            fruitName, tostring(position), meshId, getSeaName(game.PlaceId), game.PlaceId, game.JobId)
+        sendToDiscord(msg)
+        teleportButton.Visible = true
+        fruitPosition = position
+        alreadySent = true
+
+        createESP(flameFruit, fruitName, distance)
+    end
+
+    local espGui = flameFruit:FindFirstChild("FruitESP")
+    if espGui and espGui:FindFirstChildOfClass("TextLabel") then
+        espGui.TextLabel.Text = fruitName .. "\n📏 " .. tostring(distance) .. " meters"
+    end
+
+    return
+end
+
 
     -- Despawn detection
     if lastKnownFruit then
